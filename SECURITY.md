@@ -4,8 +4,13 @@
 
 Please report vulnerabilities privately, not in a public issue:
 
-- **Preferred:** [GitHub private vulnerability reporting](https://github.com/CCCrafts/punctual/security/advisories/new)
-- **Email:** hello@punctual.sh
+- **Preferred:** [GitHub private vulnerability reporting](https://github.com/baranskyi/APOLLO-booking/security/advisories/new)
+- **Email:** the address in `SUPPORT_EMAIL` on the deployment you found it on
+
+If the issue is in the upstream engine rather than in this fork's branding or
+Ukrainian copy, it is worth reporting to
+[CCCrafts/punctual](https://github.com/CCCrafts/punctual/security/advisories/new)
+as well — every other deployment of it is affected too.
 
 You'll get an acknowledgement within 72 hours. Please include reproduction
 steps and, for anything involving dates or times, the timezones in question.
