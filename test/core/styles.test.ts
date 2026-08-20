@@ -39,3 +39,32 @@ describe('the generated CSS blocks', () => {
     }
   })
 })
+
+/**
+ * Dark mode is declared twice — once under `prefers-color-scheme` for the
+ * automatic case, once under `[data-theme=dark]` so an explicit toggle can
+ * outrank the OS. They are two copies of the same list, and nothing but this
+ * test stops someone adding a token to one and not the other: the symptom is
+ * a colour that flips correctly when the OS is dark but not when a reader
+ * picks dark by hand, which nobody notices until a reader complains.
+ */
+function darkBlocks(tokens: string): [string[], string[]] {
+  const media = /@media \(prefers-color-scheme:dark\)\{\s*:root:not\(\[data-theme=light\]\)\{([^}]*)\}/.exec(tokens)
+  const attr = /:root\[data-theme=dark\]\{([^}]*)\}/.exec(tokens)
+  if (!media || !attr) throw new Error('could not find both dark-mode blocks')
+  const declarations = (block: string) =>
+    block
+      .split(';')
+      .map((d) => d.replace(/\/\*[\s\S]*?\*\//g, '').trim())
+      .filter((d) => d.startsWith('--'))
+      .sort()
+  return [declarations(media[1] as string), declarations(attr[1] as string)]
+}
+
+describe('the two dark-mode blocks', () => {
+  it('declare exactly the same tokens with the same values', () => {
+    const [media, attr] = darkBlocks(TOKENS)
+    expect(media.length).toBeGreaterThan(10)
+    expect(media).toEqual(attr)
+  })
+})

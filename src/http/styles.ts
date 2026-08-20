@@ -131,6 +131,12 @@ export const TOKENS = `
   --pu-surface-raised:var(--pu-paper);
   --pu-surface-sunken:var(--pu-paper-dim);
   --pu-surface-overlay:rgba(0,0,0,.45);
+  /* The stage: the brand's black bar/card, used by the dashboard header and
+     the front-page hero. Literal black on a light page. In dark mode the page
+     itself is already black, so the stage lifts to the raised surface instead
+     — otherwise the bar vanishes into the canvas and its contents read as
+     floating. Its children are coloured for a dark ground either way. */
+  --pu-stage:#000000;
 
   /* Text: primary/secondary track --pu-ink-950/--pu-ink-500 verbatim — they
      already flip for dark mode below the same way. "muted" and "disabled"
@@ -237,6 +243,7 @@ export const TOKENS = `
     --pu-danger-tint:#3D1212; --pu-warn-text:#FBBF24; --pu-warn-tint:#3A2C12;
     --pu-shadow-sm:0 1px 2px rgba(0,0,0,.4);
     --pu-surface-raised:#181818;
+    --pu-stage:#181818;
     --pu-status-success-bg:#0F1D3D;
     --pu-text-muted:rgba(189,189,189,.72); --pu-text-disabled:rgba(189,189,189,.45);
     --pu-surface-overlay:rgba(0,0,0,.6);
@@ -249,6 +256,7 @@ export const TOKENS = `
   --pu-danger-tint:#3D1212; --pu-warn-text:#FBBF24; --pu-warn-tint:#3A2C12;
   --pu-shadow-sm:0 1px 2px rgba(0,0,0,.4);
   --pu-surface-raised:#181818;
+  --pu-stage:#181818;
   --pu-status-success-bg:#0F1D3D;
   --pu-text-muted:rgba(189,189,189,.72); --pu-text-disabled:rgba(189,189,189,.45);
   --pu-surface-overlay:rgba(0,0,0,.6);
@@ -506,7 +514,7 @@ input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:
    stage, not a dark-mode reading of a light surface, so it is a literal here
    rather than a surface token that would flip to white in light mode. Its
    children are re-coloured for that fixed ground below. */
-.pu-dash-header{background:#000000;color:#FFFFFF;border-radius:var(--pu-radius-lg);
+.pu-dash-header{background:var(--pu-stage);color:#FFFFFF;border-radius:var(--pu-radius-lg);
   padding:.9rem 1.25rem}
 .pu-dash-header .pu-mark{color:#FFFFFF}
 .pu-dash-header .pu-nav-link{color:rgba(255,255,255,.75)}
@@ -600,7 +608,7 @@ export const LANDING_CSS = `
 /* The stage: black in both themes, like the dashboard bar — in this brand
    black is a surface in its own right, not a dark-mode reading of a light
    one. Its contents are coloured for that fixed ground. */
-.pu-hero{background:#000000;color:#FFFFFF;border-radius:var(--pu-radius-lg);
+.pu-hero{background:var(--pu-stage);color:#FFFFFF;border-radius:var(--pu-radius-lg);
   padding:3.5rem 2rem 3rem;text-align:center}
 .pu-hero .pu-mark{color:#FFFFFF}
 .pu-hero .pu-mark svg{height:2.25rem;margin:0 auto}
