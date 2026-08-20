@@ -179,7 +179,7 @@ export function loginPage(d: LoginPageData): string {
     .map(
       (p) =>
         `<a class="pu-btn pu-btn-ghost" style="display:block;margin-top:.5rem"
-       href="/auth/${p}/start?purpose=identity">Continue with ${escapeHtml(providerLabel(p))}</a>`,
+       href="/auth/${p}/start?purpose=identity">Увійти через ${escapeHtml(providerLabel(p))}</a>`,
     )
     .join('\n    ')
 
