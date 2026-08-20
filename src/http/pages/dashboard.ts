@@ -713,8 +713,7 @@ export function teamsPage(d: TeamsPageData): string {
   const errors = d.errors ?? {}
   const cards =
     d.teams.length === 0
-      ? `<p class="pu-muted">Команд ще немає. Команда володіє почерговими та спільними подіями —
-       створи її нижче, потім обери власником події.</p>`
+      ? `<p class="pu-muted">Команд ще немає. Створи нижче, потім обери власником події.</p>`
       : d.teams.map((view) => teamCard(d, view)).join('\n')
 
   return (
