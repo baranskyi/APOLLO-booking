@@ -170,7 +170,7 @@ describe('avatar upload', () => {
     const oversized = new Uint8Array(5 * 1024 * 1024 + 1)
     const res = await uploadAvatar(cookie, csrf, { bytes: oversized, type: 'image/png' })
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('larger than 5 MB')
+    expect(await res.text()).toContain('більший за 5 МБ')
   })
 
   it('rejects a request with no valid CSRF token', async () => {
@@ -184,7 +184,7 @@ describe('avatar upload', () => {
     const csrf = await csrfFor(cookie)
     const res = await uploadAvatar(cookie, csrf, { bytes: bombPngBytes(), type: 'image/png' })
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('too large')
+    expect(await res.text()).toContain('завелике')
   })
 
   it('uploads a real PNG, resizes it, and serves the thumbnail back at /avatars/:key', async () => {
@@ -194,7 +194,7 @@ describe('avatar upload', () => {
     const res = await uploadAvatar(cookie, csrf, { bytes: pngBytes(), type: 'image/png' })
     expect(res.status).toBe(200)
     const html = await res.text()
-    expect(html).toContain('Photo updated')
+    expect(html).toContain('Фото оновлено')
 
     const key = /\/avatars\/([a-f0-9]{64}-thumb\.webp)/.exec(html)?.[1]
     expect(key).toBeTruthy()
@@ -317,7 +317,7 @@ describe('avatar removal', () => {
       }),
     )
     expect(res.status).toBe(200)
-    expect(await res.text()).toContain('Photo removed')
+    expect(await res.text()).toContain('Фото прибрано')
 
     const row = await db.prepare('SELECT avatar_key FROM users WHERE id = ?').bind(HOST_ID).first<{
       avatar_key: string | null

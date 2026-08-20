@@ -71,16 +71,28 @@ export interface BookingEmailContext {
 
 // Brand palette. Inline hex rather than tokens: email has no cascade and no
 // custom properties, so every colour has to travel with the element.
-const INK = '#0F1512'
-const MUTED = '#5C6660'
-const PAPER = '#FAFAF7'
-const PAPER_DIM = '#F0F1EC'
-const LINE = '#E3E5DE'
-const MERIDIAN = '#0E7C4C'
-const DANGER = '#D92D20'
+const INK = '#000000'
+const MUTED = '#3A3A3A'
+const PAPER = '#F0F0EE'
+const PAPER_DIM = '#F0F0EE'
+const LINE = '#D9D9D9'
+// Signal blue, not Ignite orange — the brand reserves blue for the
+// transactional, and it is also the only accent that carries WHITE button
+// text legibly (6.4:1, against orange's 2.95:1). The app can put black on
+// orange because it controls the label colour through a token; an email
+// button's label travels inline, and a light-on-dark button is what every
+// mail client's dark mode expects to find. Ignite appears in mail only as
+// the wordmark's accent, where nothing sits on top of it.
+const MERIDIAN = '#004FE8'
+// Darkened Redline: the cancellation accent doubles as a button fill, and
+// #FF2424 under white text is 3.8:1.
+const DANGER = '#D41A1A'
+const IGNITE = '#FF6424'
 
-const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif"
-const MONO = "ui-monospace,SFMono-Regular,Menlo,'IBM Plex Mono',monospace"
+// Halvar cannot load in mail (no @font-face worth trusting, and the licence
+// is not ours to serve to inboxes), so this is a neutral grotesk stack that
+// degrades predictably rather than a Halvar-first stack that never resolves.
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
 
 // ---------------------------------------------------------------------------
 // Escaping
@@ -214,8 +226,8 @@ function ctaHtml(cta: Cta, accent: string): string {
   // on a <td> is not.
   return (
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px 0;">` +
-    `<tr><td bgcolor="${accent}" style="border-radius:10px;">` +
-    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:12px 22px;font-family:${FONT};font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">${escapeHtml(cta.label)}</a>` +
+    `<tr><td bgcolor="${accent}" style="border-radius:999px;">` +
+    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:12px 22px;font-family:${FONT};font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:999px;">${escapeHtml(cta.label)}</a>` +
     `</td></tr></table>`
   )
 }
@@ -240,7 +252,7 @@ function shell(input: ShellInput): string {
     // schemes` are the one dark-mode hook that survives clients stripping
     // `<style>` blocks — they ask Apple Mail/Outlook.com to leave this light
     // design alone instead of auto-inverting it into unreadable pairings.
-    `<!doctype html><html lang="en"><head>` +
+    `<!doctype html><html lang="uk"><head>` +
     `<meta charset="utf-8">` +
     `<meta name="viewport" content="width=device-width,initial-scale=1">` +
     `<meta http-equiv="X-UA-Compatible" content="IE=edge">` +
@@ -252,11 +264,11 @@ function shell(input: ShellInput): string {
     `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(input.preheader)}</div>` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${PAPER};margin:0;padding:0;">` +
     `<tr><td align="center" style="padding:24px 12px;">` +
-    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;background-color:#FFFFFF;border:1px solid ${LINE};border-radius:16px;">` +
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;background-color:#FFFFFF;border:1px solid ${LINE};border-radius:20px;">` +
     // Wordmark as text, not an image: images are blocked by default in Outlook
     // and Gmail, and a confirmation must not open on a broken placeholder.
-    `<tr><td style="padding:24px 28px 8px 28px;font-family:${MONO};font-size:16px;font-weight:600;letter-spacing:-0.02em;color:${INK};">` +
-    `${escapeHtml(input.brandName.toLowerCase())}<span style="color:${accent};">:</span>` +
+    `<tr><td style="padding:24px 28px 8px 28px;font-family:${FONT};font-size:15px;font-weight:700;letter-spacing:0.08em;color:${INK};">` +
+    `${escapeHtml(input.brandName.toUpperCase())}<span style="color:${IGNITE};">.</span>` +
     `</td></tr>` +
     // The host photo, unlike the wordmark above: optional, decorative, an
     // <img> with real alt text. If it fails to load the row still reserves
@@ -271,7 +283,7 @@ function shell(input: ShellInput): string {
     `<tr><td style="padding:8px 28px 0 28px;font-family:${FONT};font-size:22px;line-height:30px;font-weight:700;color:${INK};">${escapeHtml(input.heading)}</td></tr>` +
     `<tr><td style="padding:12px 28px 0 28px;font-family:${FONT};font-size:15px;line-height:23px;color:${INK};">${escapeHtml(input.intro)}</td></tr>` +
     `<tr><td style="padding:20px 28px 0 28px;">` +
-    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:${PAPER_DIM};border-radius:10px;">` +
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:${PAPER_DIM};border-radius:12px;">` +
     `<tr><td style="padding:16px 18px;">` +
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">${rows}</table>` +
     `</td></tr></table></td></tr>` +
@@ -281,7 +293,7 @@ function shell(input: ShellInput): string {
       ? `<tr><td style="padding:22px 28px 24px 28px;border-top:1px solid ${LINE};">${notes}</td></tr>`
       : `<tr><td style="padding:24px;"></td></tr>`) +
     `</table>` +
-    `<div style="font-family:${FONT};font-size:11px;line-height:18px;color:${MUTED};padding:14px 8px 0 8px;">Sent by ${escapeHtml(input.brandName)}</div>` +
+    `<div style="font-family:${FONT};font-size:11px;line-height:18px;color:${MUTED};padding:14px 8px 0 8px;">Надіслано ${escapeHtml(input.brandName)}</div>` +
     `</td></tr></table>` +
     `</body></html>`
   )
@@ -350,18 +362,18 @@ function answerRows(ctx: BookingEmailContext): DetailRow[] {
 function baseRows(ctx: BookingEmailContext, audience: EmailAudience, tz: string): DetailRow[] {
   const { booking, eventType } = ctx
   const rows: DetailRow[] = [
-    { label: 'What', value: eventType.title },
-    { label: 'When', value: formatWhen(booking.startUtc, booking.endUtc, tz) },
-    { label: 'Duration', value: `${eventType.durationMinutes} minutes` },
-    { label: 'Where', value: describeLocation(eventType) },
+    { label: 'Що', value: eventType.title },
+    { label: 'Коли', value: formatWhen(booking.startUtc, booking.endUtc, tz) },
+    { label: 'Тривалість', value: `${eventType.durationMinutes} хв` },
+    { label: 'Де', value: describeLocation(eventType) },
   ]
   if (audience === 'guest') {
-    rows.push({ label: 'Host', value: hostNamesWithCompany(ctx) })
+    rows.push({ label: 'Проводить', value: hostNamesWithCompany(ctx) })
   } else {
-    rows.push({ label: 'Guest', value: `${booking.guestName} (${booking.guestEmail})` })
+    rows.push({ label: 'Гість', value: `${booking.guestName} (${booking.guestEmail})` })
     // The host is told the guest's zone explicitly: it is what makes "9am for
     // you" checkable against what the guest was shown.
-    rows.push({ label: 'Guest time', value: formatWhen(booking.startUtc, booking.endUtc, booking.guestTimezone) })
+    rows.push({ label: 'Час гостя', value: formatWhen(booking.startUtc, booking.endUtc, booking.guestTimezone) })
   }
   return [...rows, ...answerRows(ctx)]
 }
@@ -369,10 +381,10 @@ function baseRows(ctx: BookingEmailContext, audience: EmailAudience, tz: string)
 function manageCtas(ctx: BookingEmailContext, audience: EmailAudience): Cta[] {
   const ctas: Cta[] = []
   if (audience === 'guest') {
-    if (ctx.rescheduleUrl) ctas.push({ label: 'Reschedule', url: ctx.rescheduleUrl, primary: true })
-    if (ctx.cancelUrl) ctas.push({ label: 'Cancel', url: ctx.cancelUrl })
+    if (ctx.rescheduleUrl) ctas.push({ label: 'Перенести', url: ctx.rescheduleUrl, primary: true })
+    if (ctx.cancelUrl) ctas.push({ label: 'Скасувати', url: ctx.cancelUrl })
   } else if (ctx.bookingUrl) {
-    ctas.push({ label: 'View booking', url: ctx.bookingUrl, primary: true })
+    ctas.push({ label: 'Переглянути бронювання', url: ctx.bookingUrl, primary: true })
   }
   return ctas
 }
@@ -381,11 +393,11 @@ function tzNote(tz: string, startUtc: number): string {
   // Same humanization as the timezone picker on the booking page (booking.ts)
   // — the raw IANA id's underscore reads as a system identifier, not a place,
   // in a sentence meant for a guest.
-  return `All times shown in ${tz.replace(/_/g, ' ')} (${offsetLabel(startUtc, tz)}).`
+  return `Час у зоні ${tz.replace(/_/g, ' ')} (${offsetLabel(startUtc, tz)}).`
 }
 
 function supportNote(ctx: BookingEmailContext): string[] {
-  return ctx.supportEmail ? [`Questions? Reply to this email or write to ${ctx.supportEmail}.`] : []
+  return ctx.supportEmail ? [`Питання? Відповідай на цей лист або пиши на ${ctx.supportEmail}.`] : []
 }
 
 function brandOf(ctx: BookingEmailContext): string {
@@ -408,11 +420,11 @@ export function bookingConfirmationForGuest(ctx: BookingEmailContext): EmailCont
   const input: ShellInput = {
     brandName,
     preheader: `${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
-    heading: 'Your meeting is confirmed',
+    heading: 'Зустріч підтверджено',
     intro:
       ctx.hasAttachment === false
-        ? `${ctx.booking.guestName}, you are booked with ${hostNames(ctx)}.`
-        : `${ctx.booking.guestName}, you are booked with ${hostNames(ctx)}. The invite is attached, so it lands in your calendar with one tap.`,
+        ? `${ctx.booking.guestName}, тебе записано до ${hostNames(ctx)}.`
+        : `${ctx.booking.guestName}, тебе записано до ${hostNames(ctx)}. Запрошення у вкладенні — один тап, і воно в календарі.`,
     rows: baseRows(ctx, 'guest', tz),
     ctas: manageCtas(ctx, 'guest'),
     notes: [tzNote(tz, ctx.booking.startUtc), ...supportNote(ctx)],
@@ -427,7 +439,7 @@ export function bookingConfirmationForGuest(ctx: BookingEmailContext): EmailCont
   }
   return render(
     input,
-    `Confirmed: ${ctx.eventType.title} with ${hostNames(ctx)} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
+    `Підтверджено: ${ctx.eventType.title} з ${hostNames(ctx)} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
   )
 }
 
@@ -437,7 +449,7 @@ export function bookingConfirmationForHost(ctx: BookingEmailContext): EmailConte
   const input: ShellInput = {
     brandName,
     preheader: `${ctx.booking.guestName} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
-    heading: 'New booking',
+    heading: 'Нове бронювання',
     // The same .ics that lands the guest's copy is attached here too — worth
     // saying, since not every calendar is connected for auto-sync and a host
     // whose client doesn't auto-detect the attachment needs to know it's there.
@@ -446,15 +458,15 @@ export function bookingConfirmationForHost(ctx: BookingEmailContext): EmailConte
     // copy must not claim an attachment that was never actually sent.
     intro:
       ctx.hasAttachment === false
-        ? `${ctx.booking.guestName} booked ${ctx.eventType.title}. It is already on your calendar.`
-        : `${ctx.booking.guestName} booked ${ctx.eventType.title}. It is already on your calendar — the invite is attached too, in case you need it elsewhere.`,
+        ? `${ctx.booking.guestName} забронював ${ctx.eventType.title}. Уже у твоєму календарі.`
+        : `${ctx.booking.guestName} забронював ${ctx.eventType.title}. Уже у твоєму календарі — запрошення також у вкладенні, якщо знадобиться деінде.`,
     rows: baseRows(ctx, 'host', tz),
     ctas: manageCtas(ctx, 'host'),
     notes: [tzNote(tz, ctx.booking.startUtc)],
   }
   return render(
     input,
-    `New booking: ${ctx.eventType.title} with ${ctx.booking.guestName} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
+    `Нове бронювання: ${ctx.eventType.title} — ${ctx.booking.guestName} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
   )
 }
 
@@ -477,34 +489,34 @@ export function bookingRescheduled(ctx: RescheduleEmailContext): EmailContent {
   // is "did it move off the slot I blocked out?", and two adjacent lines answer
   // it faster than a paragraph.
   rows.splice(2, 0, {
-    label: 'Previously',
+    label: 'Було',
     value: formatWhen(ctx.previous.startUtc, ctx.previous.endUtc, tz),
     strike: true,
   })
   const who = ctx.audience === 'guest' ? hostNames(ctx) : ctx.booking.guestName
   const input: ShellInput = {
     brandName,
-    preheader: `New time: ${formatWhenShort(ctx.booking.startUtc, tz)}`,
-    heading: 'Your meeting moved',
+    preheader: `Новий час: ${formatWhenShort(ctx.booking.startUtc, tz)}`,
+    heading: 'Зустріч перенесено',
     intro:
       ctx.audience === 'guest'
         ? ctx.hasAttachment === false
-          ? `Your meeting with ${who} has a new time.`
-          : `Your meeting with ${who} has a new time. The updated invite is attached and replaces the old one — no need to delete anything.`
+          ? `Зустріч із ${who} має новий час.`
+          : `Зустріч із ${who} має новий час. Оновлене запрошення у вкладенні — воно замінює старе, видаляти нічого не треба.`
         : ctx.hasAttachment === false
-          ? `${who} rescheduled. Your calendar has been updated automatically.`
-          : `${who} rescheduled. Your calendar has been updated automatically, and the updated invite is attached too.`,
+          ? `${who} переніс зустріч. Твій календар оновлено автоматично.`
+          : `${who} переніс зустріч. Твій календар оновлено автоматично, оновлене запрошення теж у вкладенні.`,
     rows,
     ctas: manageCtas(ctx, ctx.audience),
     notes: [
       tzNote(tz, ctx.booking.startUtc),
       // ADR-0005 §4: rescheduling rotates the manage token, so links in the
       // superseded confirmation are dead. Saying so prevents a support ticket.
-      'Links in the earlier confirmation no longer work — use the ones above.',
+      'Посилання з попереднього листа більше не працюють — користуйся тими, що вище.',
       ...supportNote(ctx),
     ],
   }
-  return render(input, `Rescheduled: ${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`)
+  return render(input, `Перенесено: ${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`)
 }
 
 export interface CancellationEmailContext extends BookingEmailContext {
@@ -519,7 +531,7 @@ export function bookingCancelled(ctx: CancellationEmailContext): EmailContent {
   const tz = zoneFor(ctx, ctx.audience)
   const brandName = brandOf(ctx)
   const rows = baseRows(ctx, ctx.audience, tz)
-  if (ctx.reason && ctx.reason.trim() !== '') rows.push({ label: 'Reason', value: ctx.reason.trim() })
+  if (ctx.reason && ctx.reason.trim() !== '') rows.push({ label: 'Причина', value: ctx.reason.trim() })
 
   const by =
     ctx.cancelledBy === 'host'
@@ -533,15 +545,15 @@ export function bookingCancelled(ctx: CancellationEmailContext): EmailContent {
     // where the brand's discipline rule (green means confirmed) must not apply.
     accent: DANGER,
     preheader: `${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
-    heading: 'This meeting was cancelled',
+    heading: 'Зустріч скасовано',
     intro: by
-      ? `${by} cancelled ${ctx.eventType.title}. It has been removed from the calendar.`
-      : `${ctx.eventType.title} has been cancelled and removed from the calendar.`,
+      ? `${by} скасував ${ctx.eventType.title}. Подію прибрано з календаря.`
+      : `${ctx.eventType.title} скасовано і прибрано з календаря.`,
     rows,
-    ctas: ctx.rebookUrl ? [{ label: 'Book a new time', url: ctx.rebookUrl, primary: true }] : [],
+    ctas: ctx.rebookUrl ? [{ label: 'Обрати новий час', url: ctx.rebookUrl, primary: true }] : [],
     notes: [tzNote(tz, ctx.booking.startUtc), ...supportNote(ctx)],
   }
-  return render(input, `Cancelled: ${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`)
+  return render(input, `Скасовано: ${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`)
 }
 
 export interface ReminderEmailContext extends BookingEmailContext {
@@ -552,18 +564,18 @@ export interface ReminderEmailContext extends BookingEmailContext {
 export function bookingReminder(ctx: ReminderEmailContext): EmailContent {
   const tz = zoneFor(ctx, ctx.audience)
   const brandName = brandOf(ctx)
-  const lead = ctx.when === '24h' ? 'tomorrow' : 'in an hour'
+  const lead = ctx.when === '24h' ? 'завтра' : 'за годину'
   const who = ctx.audience === 'guest' ? hostNames(ctx) : ctx.booking.guestName
   const input: ShellInput = {
     brandName,
     preheader: `${ctx.eventType.title} ${lead} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
-    heading: ctx.when === '24h' ? 'Your meeting is tomorrow' : 'Your meeting starts in an hour',
-    intro: `A reminder that ${ctx.eventType.title} with ${who} starts ${lead}.`,
+    heading: ctx.when === '24h' ? 'Зустріч завтра' : 'Зустріч за годину',
+    intro: `Нагадуємо: ${ctx.eventType.title} з ${who} — ${lead}.`,
     rows: baseRows(ctx, ctx.audience, tz),
     ctas: manageCtas(ctx, ctx.audience),
     notes: [tzNote(tz, ctx.booking.startUtc), ...supportNote(ctx)],
   }
-  const prefix = ctx.when === '24h' ? 'Tomorrow' : 'In 1 hour'
+  const prefix = ctx.when === '24h' ? 'Завтра' : 'За годину'
   return render(input, `${prefix}: ${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`)
 }
 
@@ -590,20 +602,20 @@ export function magicLinkEmail(input: MagicLinkInput): EmailContent {
   const brandName = input.brandName ?? 'Punctual'
   const shellInput: ShellInput = {
     brandName,
-    preheader: `Your sign-in link expires in ${input.expiresMinutes} minutes.`,
-    heading: `Sign in to ${brandName}`,
-    intro: `Click the button below to sign in. The link works once and expires in ${input.expiresMinutes} minutes.`,
+    preheader: `Лінк для входу діє ${input.expiresMinutes} хвилин.`,
+    heading: `Вхід до ${brandName}`,
+    intro: `Натисни кнопку, щоб увійти. Лінк одноразовий і діє ${input.expiresMinutes} хвилин.`,
     rows: [
-      { label: 'Requested from', value: input.ip || 'unknown' },
-      { label: 'Device', value: (input.userAgent || 'unknown').slice(0, 200) },
+      { label: 'Запит з IP', value: input.ip || 'невідомо' },
+      { label: 'Пристрій', value: (input.userAgent || 'невідомо').slice(0, 200) },
     ],
-    ctas: [{ label: 'Sign in', url: input.url, primary: true }],
+    ctas: [{ label: 'Увійти', url: input.url, primary: true }],
     notes: [
-      'If you did not request this, ignore this email — the link expires on its own and nothing changes until it is used.',
-      ...(input.supportEmail ? [`Something looks wrong? Write to ${input.supportEmail}.`] : []),
+      'Якщо ти цього не запитував — просто проігноруй лист. Лінк згасне сам, і нічого не зміниться, поки ним не скористаються.',
+      ...(input.supportEmail ? [`Щось не так? Пиши на ${input.supportEmail}.`] : []),
     ],
   }
   // `plain()` already emits the raw URL under its label, which is what a client
   // that mangles the button falls back to.
-  return render(shellInput, `Sign in to ${brandName}`)
+  return render(shellInput, `Вхід до ${brandName}`)
 }

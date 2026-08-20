@@ -8,10 +8,12 @@
  * fetched async, never blocking first paint, and a returning visitor pays
  * the ~120 KB combined cost once, cached long past any single page's budget.
  *
- * Tokens mirror docs/branding/assets/tokens.css. The three brand faces are
- * self-hosted OFL files under assets/fonts/ (see FONT_FACES below) — vendored
- * at build time from Google Fonts' own CDN rather than called at runtime, so
- * a visitor's request never leaves punctual's origin.
+ * Tokens are the APOLLO NEXT brand system. Halvar Breitschrift carries the
+ * whole voice (display AND body — the brand uses one face for both); IBM Plex
+ * Mono handles times, slugs and code. All are self-hosted under assets/fonts/
+ * rather than called at runtime, so a visitor's request never leaves this
+ * origin. Halvar is commercial and therefore untracked in git — see
+ * assets/fonts/HALVAR-README.txt for what a clone without it renders.
  *
  * `font-display: optional`, not `swap`, on every face: whichever font the
  * first paint uses is the font the page KEEPS — the brand face when it's
@@ -24,45 +26,54 @@
  */
 
 /**
- * `unicode-range` scoped to Latin (spec: English everywhere) so a browser
- * never fetches a font file to render a codepoint punctual doesn't ship
- * copy in. Weights match what BASE_CSS/LANDING_CSS actually set — no spare
- * weights riding along unused.
+ * Halvar ships NO unicode-range: the UI is Ukrainian, so every page needs the
+ * Cyrillic in it and range-gating the brand face would only add a rule the
+ * browser always satisfies. The 500 face declares `font-weight:500 800` — the
+ * brand book's own trick (Halvar ships Regular and Medium only), so the 600
+ * and 700 that BASE_CSS already sets resolve to real Medium rather than a
+ * synthesised faux-bold.
+ *
+ * IBM Plex Mono keeps the range split, because it genuinely has two jobs:
+ * Latin for slugs/keys/code, Cyrillic for the localized dates that render in
+ * .pu-time. A browser fetches whichever the page actually needs.
  */
 export const FONT_FACES = `
+@font-face{font-family:"Halvar Breitschrift";font-style:normal;font-weight:400;font-display:optional;
+  src:url(/fonts/halvar-400.woff2) format("woff2")}
+@font-face{font-family:"Halvar Breitschrift";font-style:normal;font-weight:500 800;font-display:optional;
+  src:url(/fonts/halvar-500.woff2) format("woff2")}
 @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:optional;
   src:url(/fonts/ibmplexmono-400.woff2) format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:optional;
+  src:url(/fonts/ibmplexmono-cyrillic-400.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
 @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:optional;
   src:url(/fonts/ibmplexmono-600.woff2) format("woff2");
-  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:700;font-display:optional;
-  src:url(/fonts/ibmplexmono-700.woff2) format("woff2");
-  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:optional;
-  src:url(/fonts/inter-variable.woff2) format("woff2");
-  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:"Schibsted Grotesk";font-style:normal;font-weight:600;font-display:optional;
-  src:url(/fonts/schibstedgrotesk-600.woff2) format("woff2");
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 `
 
 export const TOKENS = `
+/* APOLLO NEXT palette. Black is the stage, Ignite orange is the call (one
+   per viewport), Signal blue is the contract — links and anything
+   transactional. The --pu-green-* names are kept verbatim from upstream: they
+   are load-bearing across ~1000 references and renaming them would be pure
+   churn, so read "green" as "the accent family" throughout this file.
+   --pu-green-700/800 are Signal blue; --pu-green-fill/-hover are Ignite. */
 :root{
-  --pu-ink-950:#0F1512; --pu-ink-900:#17201B; --pu-ink-700:#2E3B34;
-  --pu-ink-500:#5C6660; --pu-paper:#FAFAF7; --pu-paper-dim:#F0F1EC;
-  --pu-line:#E3E5DE; --pu-green-700:#0E7C4C; --pu-green-800:#0A5C3A;
-  --pu-signal:#1FC16B; --pu-green-tint:#E4F5EC; --pu-danger:#D92D20;
-  --pu-danger-800:#B8241A; --pu-danger-text:#D92D20; --pu-danger-tint:#FBEAE8;
-  /* A solid green fill behind white/paper text (buttons, the chosen-slot dot,
-     step numbers) needs to stay this dark in EITHER theme — unlike
-     --pu-green-700/800, deliberately NOT redefined under dark mode below.
-     --pu-green-700 brightens in dark mode because it also serves as body
-     text/links there, where it must read against a dark page background;
-     that same brightening drops a filled button's white-on-green contrast
-     to ~2.4:1 (fails WCAG AA) if it shares the token. Same shades as
-     light mode's green-700/800 — those already pass comfortably (5.2:1). */
-  --pu-green-fill:#0E7C4C; --pu-green-fill-hover:#0A5C3A;
+  --pu-ink-950:#000000; --pu-ink-900:#181818; --pu-ink-700:#1D1D1D;
+  --pu-ink-500:#3A3A3A; --pu-paper:#FFFFFF; --pu-paper-dim:#F0F0EE;
+  --pu-line:#D9D9D9; --pu-green-700:#004FE8; --pu-green-800:#003CB5;
+  --pu-signal:#FF6424; --pu-green-tint:#FFE3D6; --pu-danger:#FF2424;
+  --pu-danger-800:#E01F1F; --pu-danger-text:#D41A1A; --pu-danger-tint:#FFE5E5;
+  /* Ignite, behind the black label set by --pu-text-on-accent below. Stays
+     pinned across BOTH themes — unlike --pu-green-700/800, which brighten in
+     dark mode because they double as body links there. #FF6424 needs no
+     per-theme reading of its own: black on it is 7.1:1 either way, which is
+     also why the label is black and not the brand book's white (white on
+     Ignite is 2.95:1 — below AA even for large text, and darkening the fill
+     until white passes turns the brand orange brown). */
+  --pu-green-fill:#FF6424; --pu-green-fill-hover:#E25517;
   /* Warn — added for the semantic layer below. Fill/border stays one
      value across themes, same discipline as --pu-green-fill above; a
      separate -text variant is redefined per theme below because #F5A623
@@ -71,18 +82,27 @@ export const TOKENS = `
      darkened amber for readable text while dark mode can stay near the
      brand hue. */
   --pu-warn:#F5A623; --pu-warn-text:#92400E; --pu-warn-tint:#FCEFD9;
-  --pu-font-display:"Schibsted Grotesk",system-ui,-apple-system,sans-serif;
-  --pu-font-ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* One face for display and body — the brand runs Halvar everywhere, so
+     these two tokens are deliberately the same stack rather than a pairing.
+     Archivo is the nearest widely-installed geometric industrial grotesk and
+     stands in when the licensed file is absent (a public clone, see
+     assets/fonts/HALVAR-README.txt). */
+  --pu-font-display:"Halvar Breitschrift","Archivo",system-ui,-apple-system,sans-serif;
+  --pu-font-ui:"Halvar Breitschrift","Archivo",system-ui,-apple-system,sans-serif;
   --pu-font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --pu-radius:10px; --pu-radius-lg:16px;
-  --pu-shadow-sm:0 1px 2px rgba(15,21,18,.06);
-  --pu-ring:0 0 0 3px color-mix(in srgb,var(--pu-green-700) 25%,transparent);
+  /* The squircle scale. --pu-radius-pill is the brand's signature: every
+     button and single-line input is a full pill. -lg is 32 rather than the
+     brand book's 40 for cards, because this is dense utility UI and a 40px
+     corner starts eating the calendar grid inside it. */
+  --pu-radius:12px; --pu-radius-lg:32px; --pu-radius-pill:999px;
+  --pu-shadow-sm:0 1px 2px rgba(0,0,0,.06);
+  --pu-ring:0 0 0 4px color-mix(in srgb,var(--pu-green-700) 12%,transparent);
   /* Code blocks (docs pages): deliberately NOT redefined under the dark-mode
      media query or [data-theme=dark] below — a code panel that's always a
      dark "terminal" surface reads clearly against either a light or dark
      page background, which is simpler and more reliable than trying to keep
      a code block's syntax contrast correct across two flipped palettes. */
-  --pu-code-bg:#0F1512; --pu-code-fg:#E7F2EA; --pu-code-line:#2E3B34;
+  --pu-code-bg:#0C0C0C; --pu-code-fg:#F0F0EE; --pu-code-line:#222222;
 
   /* ---------------------------------------------------------------------
    * Semantic layer. Product UI states, one level above the raw
@@ -110,7 +130,7 @@ export const TOKENS = `
   --pu-surface-canvas:var(--pu-paper);
   --pu-surface-raised:var(--pu-paper);
   --pu-surface-sunken:var(--pu-paper-dim);
-  --pu-surface-overlay:rgba(15,21,18,.45);
+  --pu-surface-overlay:rgba(0,0,0,.45);
 
   /* Text: primary/secondary track --pu-ink-950/--pu-ink-500 verbatim — they
      already flip for dark mode below the same way. "muted" and "disabled"
@@ -123,9 +143,12 @@ export const TOKENS = `
      already accepted for e.g. .pu-cal-head. */
   --pu-text-primary:var(--pu-ink-950);
   --pu-text-secondary:var(--pu-ink-500);
-  --pu-text-muted:rgba(92,102,96,.72);
-  --pu-text-on-accent:#FFFFFF;
-  --pu-text-disabled:rgba(92,102,96,.45);
+  --pu-text-muted:rgba(58,58,58,.72);
+  /* Black, not white: every accent fill in this system is Ignite orange or
+     Redline, and both carry black text far better than white (7.1:1 and
+     5.5:1, against 2.95:1 and 3.8:1). One token decides it everywhere. */
+  --pu-text-on-accent:#000000;
+  --pu-text-disabled:rgba(58,58,58,.45);
 
   /* Border: subtle = --pu-line's existing job. strong = a border with more
      presence than a hairline but no status meaning (e.g. a divider that
@@ -160,7 +183,11 @@ export const TOKENS = `
        with no color at all; --pu-status-info/-bg codify that as the
        intentional choice rather than leaving it undocumented. */
   --pu-status-success:var(--pu-green-700);
-  --pu-status-success-bg:var(--pu-green-tint);
+  /* A literal, not var(--pu-green-tint): that tint is Ignite's, and Ignite
+     belongs to the guest's own pick in the slot picker (rule below), never to
+     a system verdict. This is Signal blue at ~8% — blue status text on it
+     reads 5.9:1. Redefined per theme below, like every other literal here. */
+  --pu-status-success-bg:#E8EFFD;
   --pu-status-danger:var(--pu-danger-text);
   --pu-status-danger-bg:var(--pu-danger-tint);
   --pu-status-warning:var(--pu-warn-text);
@@ -184,10 +211,10 @@ export const TOKENS = `
   --pu-slot-available-border:var(--pu-border-subtle);
   --pu-slot-available-text:var(--pu-text-primary);
   --pu-slot-hover-bg:var(--pu-green-tint);
-  --pu-slot-hover-border:var(--pu-green-700);
+  --pu-slot-hover-border:var(--pu-green-fill);
   --pu-slot-hover-text:var(--pu-text-primary);
   --pu-slot-selected-bg:var(--pu-green-tint);
-  --pu-slot-selected-border:var(--pu-green-700);
+  --pu-slot-selected-border:var(--pu-green-fill);
   --pu-slot-selected-text:var(--pu-text-primary);
   --pu-slot-held-bg:var(--pu-warn-tint);
   --pu-slot-held-border:var(--pu-warn);
@@ -204,24 +231,26 @@ export const TOKENS = `
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme=light]){
-    --pu-paper:#0F1512; --pu-paper-dim:#17201B; --pu-line:#2E3B34;
-    --pu-ink-950:#FAFAF7; --pu-ink-500:#9AA5A0; --pu-green-700:#1FC16B;
-    --pu-green-800:#3ED486; --pu-green-tint:#153A28; --pu-danger-text:#FF6B5B;
-    --pu-danger-tint:#3A1A16; --pu-warn-text:#FBBF24; --pu-warn-tint:#3A2C12;
+    --pu-paper:#000000; --pu-paper-dim:#181818; --pu-line:#2E2E2E;
+    --pu-ink-950:#FFFFFF; --pu-ink-500:#BDBDBD; --pu-green-700:#4D8DFF;
+    --pu-green-800:#7AAAFF; --pu-green-tint:#3D1F10; --pu-danger-text:#FF4D4D;
+    --pu-danger-tint:#3D1212; --pu-warn-text:#FBBF24; --pu-warn-tint:#3A2C12;
     --pu-shadow-sm:0 1px 2px rgba(0,0,0,.4);
-    --pu-surface-raised:#17201B;
-    --pu-text-muted:rgba(154,165,160,.72); --pu-text-disabled:rgba(154,165,160,.45);
+    --pu-surface-raised:#181818;
+    --pu-status-success-bg:#0F1D3D;
+    --pu-text-muted:rgba(189,189,189,.72); --pu-text-disabled:rgba(189,189,189,.45);
     --pu-surface-overlay:rgba(0,0,0,.6);
   }
 }
 :root[data-theme=dark]{
-  --pu-paper:#0F1512; --pu-paper-dim:#17201B; --pu-line:#2E3B34;
-  --pu-ink-950:#FAFAF7; --pu-ink-500:#9AA5A0; --pu-green-700:#1FC16B;
-  --pu-green-800:#3ED486; --pu-green-tint:#153A28; --pu-danger-text:#FF6B5B;
-  --pu-danger-tint:#3A1A16; --pu-warn-text:#FBBF24; --pu-warn-tint:#3A2C12;
+  --pu-paper:#000000; --pu-paper-dim:#181818; --pu-line:#2E2E2E;
+  --pu-ink-950:#FFFFFF; --pu-ink-500:#BDBDBD; --pu-green-700:#4D8DFF;
+  --pu-green-800:#7AAAFF; --pu-green-tint:#3D1F10; --pu-danger-text:#FF4D4D;
+  --pu-danger-tint:#3D1212; --pu-warn-text:#FBBF24; --pu-warn-tint:#3A2C12;
   --pu-shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --pu-surface-raised:#17201B;
-  --pu-text-muted:rgba(154,165,160,.72); --pu-text-disabled:rgba(154,165,160,.45);
+  --pu-surface-raised:#181818;
+  --pu-status-success-bg:#0F1D3D;
+  --pu-text-muted:rgba(189,189,189,.72); --pu-text-disabled:rgba(189,189,189,.45);
   --pu-surface-overlay:rgba(0,0,0,.6);
 }
 `
@@ -249,16 +278,17 @@ export const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--pu-surface-canvas);color:var(--pu-text-primary);
   font-family:var(--pu-font-ui);line-height:1.5;-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:var(--pu-font-display);font-weight:600;line-height:1.2;margin:0 0 .5rem}
+h1,h2,h3{font-family:var(--pu-font-display);font-weight:600;line-height:1.1;
+  letter-spacing:-.015em;margin:0 0 .5rem}
 h1{font-size:1.5rem} h2{font-size:1.125rem} h3{font-size:1rem}
 p{margin:0 0 .75rem}
 a{color:var(--pu-green-700)}
 time,.pu-time{font-family:var(--pu-font-mono);font-variant-numeric:tabular-nums}
-::selection{background:var(--pu-green-tint);color:var(--pu-green-800)}
+::selection{background:var(--pu-green-fill);color:var(--pu-text-on-accent)}
 
 .pu-wrap{max-width:900px;margin:0 auto;padding:1.5rem 1rem 4rem}
 .pu-card{background:var(--pu-surface-raised);border:1px solid var(--pu-border-subtle);
-  border-radius:var(--pu-radius-lg);padding:1.375rem;box-shadow:var(--pu-shadow-sm)}
+  border-radius:var(--pu-radius-lg);padding:1.75rem;box-shadow:var(--pu-shadow-sm)}
 .pu-muted{color:var(--pu-text-secondary)}
 /* Host identity block atop a booking page — a person, not a label, so the
    name is set in the display face at text size (never uppercase/tracked:
@@ -271,9 +301,13 @@ time,.pu-time{font-family:var(--pu-font-mono);font-variant-numeric:tabular-nums}
 .pu-host-org{margin:.1rem 0 0;font-size:.875rem;line-height:1.35;color:var(--pu-text-secondary)}
 .pu-host-link{color:var(--pu-green-700);text-decoration:none}
 .pu-host-link:hover{text-decoration:underline}
-.pu-mark{font-family:var(--pu-font-mono);font-weight:600;letter-spacing:-.02em;
-  text-decoration:none;color:var(--pu-text-primary)}
-.pu-mark span{color:var(--pu-signal)}
+/* The wordmark is an inline SVG (src/http/brand.ts) painted with
+   currentColor, so it takes the ink of whatever surface it sits on — white in
+   the black dashboard bar, ink in a light footer, white again in dark mode —
+   from one asset. Height alone sizes it; the viewBox carries the aspect. */
+.pu-mark{display:inline-flex;align-items:center;text-decoration:none;
+  color:var(--pu-text-primary)}
+.pu-mark svg{display:block;width:auto;height:1.375rem}
 
 .pu-grid{display:grid;gap:1.5rem;grid-template-columns:1fr}
 @media(min-width:780px){.pu-grid{grid-template-columns:300px 1fr}}
@@ -288,10 +322,13 @@ time,.pu-time{font-family:var(--pu-font-mono);font-variant-numeric:tabular-nums}
   border:1px solid transparent;border-radius:var(--pu-radius);background:none;
   font:inherit;font-family:var(--pu-font-mono);font-size:.9375rem;cursor:pointer;
   color:var(--pu-text-primary);text-decoration:none;transition:all .12s ease}
-.pu-day[data-has-slots="1"]{background:var(--pu-green-tint);color:var(--pu-green-700);font-weight:700}
+/* Bookable days carry Ignite's tint. The NUMBER stays ink rather than taking
+   the accent as text — orange on its own tint is 2.4:1, unreadable; weight
+   and the tint already mark the day. */
+.pu-day[data-has-slots="1"]{background:var(--pu-green-tint);color:var(--pu-text-primary);font-weight:700}
 .pu-day[aria-disabled="true"]{color:var(--pu-text-disabled);cursor:default}
 .pu-day[aria-current="date"]{box-shadow:inset 0 0 0 2px var(--pu-border-focus);font-weight:700}
-.pu-day:hover[data-has-slots="1"]{background:var(--pu-green-700);color:var(--pu-paper);transform:translateY(-1px)}
+.pu-day:hover[data-has-slots="1"]{background:var(--pu-green-fill);color:var(--pu-text-on-accent);transform:translateY(-1px)}
 .pu-day:focus-visible,.pu-slot:focus-visible,.pu-btn:focus-visible{
   outline:2px solid var(--pu-border-focus);outline-offset:2px}
 input:focus-visible,select:focus-visible,textarea:focus-visible{
@@ -341,29 +378,48 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
   padding:.85rem 1rem;border:1px solid var(--pu-slot-selected-border);border-radius:var(--pu-radius);
   background:var(--pu-slot-selected-bg)}
 .pu-slot-chosen .pu-dot-lg{flex:0 0 auto;width:.65rem;height:.65rem;border-radius:99px;
-  background:var(--pu-green-700)}
+  background:var(--pu-green-fill)}
 
-.pu-btn{display:inline-block;padding:.7rem 1.1rem;border-radius:var(--pu-radius);
+/* The brand's signature control: a full pill, label in Medium caps on +8%
+   tracking. Callers pass sentence-case copy — the uppercasing is presentation
+   and belongs here, so a label is never shouted in the source string. */
+.pu-btn{display:inline-block;padding:.8rem 1.5rem;border-radius:var(--pu-radius-pill);
   background:var(--pu-green-fill);color:var(--pu-text-on-accent);border:1px solid var(--pu-green-fill);
-  font:inherit;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;
+  font:inherit;font-family:var(--pu-font-display);font-weight:500;font-size:.875rem;
+  text-transform:uppercase;letter-spacing:.08em;
+  cursor:pointer;text-decoration:none;text-align:center;
   transition:all .12s ease}
 .pu-btn:hover{background:var(--pu-green-fill-hover);border-color:var(--pu-green-fill-hover)}
 .pu-btn[disabled]{opacity:.6;cursor:default}
-.pu-btn-ghost{background:none;color:var(--pu-text-primary);border-color:var(--pu-border-subtle)}
-.pu-btn-ghost:hover{background:var(--pu-surface-sunken);border-color:var(--pu-border-strong);color:var(--pu-text-primary)}
-/* --pu-danger, not --pu-status-danger: a solid fill behind white text needs
-   the same "pinned across themes" treatment as --pu-green-fill above —
+/* Ghost is Signal blue outline — the brand's secondary action. Inside the
+   black dashboard bar it is overridden to a white hairline (see
+   .pu-dash-header below), where blue-on-black would fail. */
+.pu-btn-ghost{background:none;color:var(--pu-green-700);border-color:var(--pu-green-700)}
+.pu-btn-ghost:hover{background:color-mix(in srgb,var(--pu-green-700) 7%,transparent);
+  border-color:var(--pu-green-800);color:var(--pu-green-800)}
+/* --pu-danger, not --pu-status-danger: a solid fill behind a label needs the
+   same "pinned across themes" treatment as --pu-green-fill above —
    --pu-status-danger tracks --pu-danger-text, which deliberately brightens
    in dark mode for readability as TEXT and would drop this button's
-   white-on-fill contrast the same way sharing --pu-green-700 would have. */
+   contrast the same way sharing --pu-green-700 would have. The label is
+   black (--pu-text-on-accent): 5.5:1 on Redline, where white is 3.8:1. */
 .pu-btn-danger{background:var(--pu-danger);border-color:var(--pu-danger);color:var(--pu-text-on-accent)}
 .pu-btn-danger:hover{background:var(--pu-danger-800);border-color:var(--pu-danger-800)}
 
-label{display:block;font-size:.875rem;font-weight:600;margin:1rem 0 .35rem}
-input,select,textarea{width:100%;padding:.65rem .75rem;border:1px solid var(--pu-line);
-  border-radius:var(--pu-radius);background:var(--pu-paper);color:var(--pu-ink-950);
+/* Field labels are set like the brand's technical captions — small caps on
+   wide tracking. In the display face, not the mono one the brand book shows:
+   these read in Ukrainian, and a monospaced caps label of "МІНІМАЛЬНИЙ ЧАС
+   ДО ЗУСТРІЧІ" is half again as wide for no gain. */
+label{display:block;font-family:var(--pu-font-display);font-size:.6875rem;
+  font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--pu-text-secondary);margin:1rem 0 .45rem}
+/* Single-line controls match the CTA geometry — pills. A textarea does not:
+   a pill around several lines of prose reads as a speech bubble, so it takes
+   the plain squircle instead. */
+input,select,textarea{width:100%;padding:.8rem 1.25rem;border:1px solid var(--pu-line);
+  border-radius:var(--pu-radius-pill);background:var(--pu-paper);color:var(--pu-ink-950);
   font:inherit;transition:border-color .12s ease}
-textarea{min-height:5rem;resize:vertical}
+textarea{min-height:5rem;resize:vertical;border-radius:var(--pu-radius-lg)}
 input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:var(--pu-status-danger)}
 .pu-err{display:flex;align-items:flex-start;gap:.4rem;color:var(--pu-status-danger);
   font-size:.8125rem;margin:.4rem 0 0}
@@ -375,8 +431,13 @@ input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:
    inline <code> into separate flex items) with its own visual weight. */
 .pu-callout{background:var(--pu-status-danger-bg);border:1px solid var(--pu-danger);
   border-radius:var(--pu-radius);padding:.75rem 1rem;font-size:.875rem;color:var(--pu-text-primary)}
-.pu-badge{display:inline-block;padding:.15rem .5rem;border-radius:99px;font-size:.75rem;
-  background:var(--pu-status-success-bg);color:var(--pu-status-success);font-weight:600}
+/* The brand's tag chip: outlined pill, small caps, tracked. Call sites that
+   inline-override background/color (a filled variant) still work — this only
+   changes the default and the type treatment. */
+.pu-badge{display:inline-block;padding:.25rem .7rem;border-radius:var(--pu-radius-pill);
+  font-family:var(--pu-font-display);font-size:.6875rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  background:transparent;border:1px solid currentColor;color:var(--pu-status-success)}
 .pu-dot{display:inline-block;width:.5rem;height:.5rem;border-radius:99px;
   background:var(--pu-signal);vertical-align:middle}
 /* align-items:center, not the default stretch: the timezone control is a
@@ -391,23 +452,24 @@ input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:
    border and focus state live on the WRAP so all four pieces read as a
    single control; the select inside is borderless and sized to the selected
    zone's name server-side (a bare <select> is otherwise as wide as its
-   widest option, leaving dead space before the chevron). The chevron is a
+   widest option, leaving dead space before the chevron). Pill, like every
+   other single-line control in this brand. The chevron is a
    CSS-drawn corner, not a data-URI image, so it takes its color from a
    token and stays correct in both themes. Focus is shown by border color
    plus the shared input ring — an outline on top of a border reads as a
    clumsy double ring (and Chrome applies :focus-visible to selects even on
    mouse click).*/
 .pu-tz-wrap{position:relative;display:inline-flex;align-items:center;max-width:100%;
-  border:1px solid var(--pu-border-subtle);border-radius:var(--pu-radius);
+  border:1px solid var(--pu-border-subtle);border-radius:var(--pu-radius-pill);
   background:var(--pu-surface-raised);transition:border-color .12s ease}
 .pu-tz-wrap:hover{border-color:var(--pu-border-strong)}
 .pu-tz-wrap:focus-within{border-color:var(--pu-border-focus);box-shadow:var(--pu-ring)}
-.pu-tz-globe{position:absolute;left:.6rem;color:var(--pu-text-secondary);pointer-events:none}
+.pu-tz-globe{position:absolute;left:.8rem;color:var(--pu-text-secondary);pointer-events:none}
 .pu-tz-wrap::after{content:"";position:absolute;right:.7rem;top:50%;width:.4rem;height:.4rem;
   border-right:1.5px solid var(--pu-text-secondary);border-bottom:1.5px solid var(--pu-text-secondary);
   transform:translateY(-70%) rotate(45deg);pointer-events:none}
 .pu-tz-select{appearance:none;-webkit-appearance:none;max-width:100%;min-width:0;
-  padding:.3rem 0 .3rem 2rem;border:0;border-radius:var(--pu-radius);outline:none;
+  padding:.3rem 0 .3rem 2.2rem;border:0;border-radius:var(--pu-radius-pill);outline:none;
   background:transparent;color:var(--pu-text-primary);font:inherit;font-size:.875rem;
   cursor:pointer;text-overflow:ellipsis}
 /* Outranks the global select:focus-visible ring — focus indication for this
@@ -435,11 +497,25 @@ input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:
 .pu-confirm-details dd{margin:0;text-align:right}
 
 .pu-nav-link{text-decoration:none;color:var(--pu-text-secondary);font-weight:500;
+  font-size:.8125rem;letter-spacing:.1em;text-transform:uppercase;
   padding:.35rem 0;border-bottom:2px solid transparent}
 .pu-nav-link:hover{color:var(--pu-text-primary)}
 .pu-nav-link[aria-current="page"]{color:var(--pu-text-primary);font-weight:600;
-  border-bottom-color:var(--pu-green-700)}
-.pu-dash-header{border-bottom:1px solid var(--pu-line);padding-bottom:1rem}
+  border-bottom-color:var(--pu-green-fill)}
+/* The header is a black bar in BOTH themes — in this brand black is the
+   stage, not a dark-mode reading of a light surface, so it is a literal here
+   rather than a surface token that would flip to white in light mode. Its
+   children are re-coloured for that fixed ground below. */
+.pu-dash-header{background:#000000;color:#FFFFFF;border-radius:var(--pu-radius-lg);
+  padding:.9rem 1.25rem}
+.pu-dash-header .pu-mark{color:#FFFFFF}
+.pu-dash-header .pu-nav-link{color:rgba(255,255,255,.75)}
+.pu-dash-header .pu-nav-link:hover{color:#FFFFFF}
+.pu-dash-header .pu-nav-link[aria-current="page"]{color:#FFFFFF;
+  border-bottom-color:var(--pu-green-fill)}
+.pu-dash-header .pu-btn-ghost{color:#FFFFFF;border-color:rgba(255,255,255,.35)}
+.pu-dash-header .pu-btn-ghost:hover{background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.6);color:#FFFFFF}
 /* Narrow enough that the nav's own wrapping (5 links) collides with the
    header's justify-content:space-between — one link stranded on its own row
    with the sign-out button, uneven gaps either side. Stacking the three
@@ -450,7 +526,7 @@ input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:
 }
 
 .pu-url{display:flex;align-items:center;gap:.5rem;background:var(--pu-surface-sunken);
-  border:1px solid var(--pu-line);border-radius:var(--pu-radius);padding:.15rem .15rem .15rem .8rem}
+  border:1px solid var(--pu-line);border-radius:var(--pu-radius-pill);padding:.15rem .15rem .15rem 1rem}
 .pu-url-input{flex:1;min-width:0;border:0;background:none;padding:.5rem 0;
   font-family:var(--pu-font-mono);font-size:.8125rem;color:var(--pu-text-primary);cursor:pointer}
 /* Fixed width, so "Copy" -> "Copied" feedback doesn't shift the layout. */
@@ -507,145 +583,38 @@ export function pageCss(): string {
 }
 
 /**
- * Landing and docs-index page only. Kept separate from BASE_CSS so the
- * booking page — the one that actually needs to hit the <80 KB budget on
- * every request — never pays for marketing-page rules it doesn't use.
+ * The front page only (`/`). Kept out of BASE_CSS so the booking page — the
+ * one that has to hit the <80 KB budget on every request — never pays for
+ * rules it doesn't use.
+ *
+ * One card on the black stage, centred. Everything else the old marketing
+ * site needed (feature grids, comparison tables, docs typography, the
+ * animated colon) went with the pages that used it.
  */
 export const LANDING_CSS = `
-.pu-landing{max-width:1120px;margin:0 auto;padding:0 1.25rem 4rem}
-.pu-hero{padding:3.5rem 0 3rem;text-align:center}
-.pu-hero .pu-mark{font-size:1.125rem}
-.pu-hero .pu-mark span{display:inline-block;animation:pu-colon-land .5s cubic-bezier(.34,1.56,.64,1) both}
-.pu-hero-clock{color:var(--pu-ink-500);opacity:0}
-.pu-hero-clock.pu-in{animation:pu-clock-in .4s ease-out .5s forwards}
-@keyframes pu-colon-land{
-  0%{transform:translateY(-10px) scale(.6);opacity:0}
-  55%{transform:translateY(2px) scale(1.15);opacity:1}
-  100%{transform:translateY(0) scale(1);opacity:1}
-}
-@keyframes pu-clock-in{
-  0%{opacity:0;transform:translateY(-4px)}
-  100%{opacity:1;transform:translateY(0)}
-}
-@media(prefers-reduced-motion:reduce){
-  .pu-hero .pu-mark span{animation:none}
-  .pu-hero-clock.pu-in{animation:none;opacity:1}
-}
-.pu-hero h1{font-family:var(--pu-font-display);font-size:clamp(1.75rem,4vw + 1rem,2.75rem);
-  margin:1.25rem 0 1rem}
-.pu-hero-lede{font-size:1.125rem;color:var(--pu-ink-500);max-width:34rem;margin:0 auto 2rem}
+.pu-landing{max-width:44rem;margin:0 auto;padding:2.5rem 1.25rem 3rem}
+/* The stage: black in both themes, like the dashboard bar — in this brand
+   black is a surface in its own right, not a dark-mode reading of a light
+   one. Its contents are coloured for that fixed ground. */
+.pu-hero{background:#000000;color:#FFFFFF;border-radius:var(--pu-radius-lg);
+  padding:3.5rem 2rem 3rem;text-align:center}
+.pu-hero .pu-mark{color:#FFFFFF}
+.pu-hero .pu-mark svg{height:2.25rem;margin:0 auto}
+.pu-hero h1{font-family:var(--pu-font-display);font-weight:700;
+  font-size:clamp(2rem,5vw + 1rem,3.25rem);line-height:.95;letter-spacing:-.03em;
+  color:#FFFFFF;margin:2rem 0 1rem}
+.pu-hero-lede{font-size:1.0625rem;color:rgba(255,255,255,.7);
+  max-width:26rem;margin:0 auto 2rem}
 .pu-hero-cta{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+/* Ghost on black: the blue outline it carries on a light page disappears
+   here, so it borrows the header bar's white hairline treatment. */
+.pu-hero .pu-btn-ghost{color:#FFFFFF;border-color:rgba(255,255,255,.35)}
+.pu-hero .pu-btn-ghost:hover{background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.6);color:#FFFFFF}
 
-.pu-landing section{margin:3.5rem 0}
-.pu-section-head{text-align:center;max-width:38rem;margin:0 auto 1.75rem}
-.pu-section-head h2{font-size:1.375rem}
-
-.pu-pledge{background:var(--pu-green-tint);border-color:var(--pu-green-700);
-  text-align:center;padding:2.25rem 1.5rem}
-.pu-pledge h2{color:var(--pu-green-800)}
-.pu-pledge p{font-size:1.125rem;max-width:40rem;margin:0 auto;color:var(--pu-ink-950)}
-
-.pu-live-demo{margin-top:2.5rem}
-.pu-embed-frame{max-width:560px;margin:0 auto;padding:.75rem}
-.pu-embed-frame iframe{border-radius:calc(var(--pu-radius-lg) - .5rem)}
-
-.pu-feature-grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.pu-feature-grid .pu-stat{display:block;font-family:var(--pu-font-mono);font-weight:700;
-  color:var(--pu-green-700);font-size:1.125rem;margin-bottom:.35rem}
-
-.pu-steps{display:grid;gap:1.5rem 1.25rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  list-style:none;padding:0;margin:0;counter-reset:pu-step}
-.pu-steps li{counter-increment:pu-step;padding-top:2.75rem;position:relative}
-.pu-steps li::before{content:counter(pu-step);position:absolute;top:0;left:0;
-  width:2rem;height:2rem;border-radius:99px;background:var(--pu-green-fill);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-family:var(--pu-font-mono);
-  font-weight:700;font-size:.875rem}
-
-.pu-compare{display:grid;gap:1.25rem;grid-template-columns:1fr}
-@media(min-width:700px){.pu-compare{grid-template-columns:1fr 1fr}}
-.pu-compare .pu-card{display:flex;flex-direction:column;gap:.25rem}
-.pu-compare h3{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.pu-compare ul{padding-left:1.1rem;margin:.5rem 0}
-.pu-compare li{margin-bottom:.4rem}
-
-.pu-compare-table-wrap{overflow-x:auto}
-/* The wrapper scrolling is invisible unless the reader already knows to try
-   it — on a narrow phone the Calendly column sits entirely off-screen with
-   no visual cue more content exists. Hidden by default; only a viewport
-   narrow enough to actually clip the table (min-width:32rem) shows it. */
-.pu-scroll-hint{display:none}
-@media(max-width:640px){.pu-scroll-hint{display:block}}
-.pu-compare-table{width:100%;border-collapse:collapse;min-width:32rem}
-.pu-compare-table th,.pu-compare-table td{text-align:left;padding:.65rem .9rem;
-  border-bottom:1px solid var(--pu-line);vertical-align:top}
-.pu-compare-table th{font-family:var(--pu-font-display);font-weight:600;font-size:.9375rem}
-.pu-compare-table td:not(:first-child),.pu-compare-table th:not(:first-child){text-align:center}
-.pu-compare-table td:first-child{color:var(--pu-ink-500);font-size:.9375rem}
-
-.pu-landing-footer{border-top:1px solid var(--pu-line);margin-top:3rem;padding-top:1.5rem}
+.pu-landing-footer{margin-top:1.5rem;padding-top:.5rem}
 .pu-landing-footer nav{display:flex;gap:1.25rem;justify-content:center;flex-wrap:wrap;
-  font-size:.875rem;margin-bottom:.75rem}
-
-/*
- * Docs section (pages/docs.ts): a nav rail + reading column, built on the
- * existing .pu-grid two-column layout (300px sidebar / 1fr content — see
- * BASE_CSS) rather than a new grid, so the docs section costs nothing extra
- * for a self-hoster who never visits /docs. Sidebar-first in source order so
- * it stays usable with CSS disabled and reads sensibly to a screen reader.
- */
-.pu-docs-hero{padding:2.5rem 0 1.5rem}
-.pu-docs-nav{position:sticky;top:1.25rem}
-.pu-docs-nav h2{font-size:.75rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
-  color:var(--pu-ink-500);margin:0 0 .6rem}
-.pu-docs-nav ul{list-style:none;margin:0;padding:0;display:grid;gap:.15rem}
-.pu-docs-nav .pu-nav-link{display:block;border-bottom:2px solid transparent;border-left:2px solid transparent;
-  padding:.4rem .1rem .4rem .75rem}
-.pu-docs-nav .pu-nav-link[aria-current="page"]{border-left-color:var(--pu-green-700);border-bottom-color:transparent;
-  background:var(--pu-green-tint);border-radius:0 var(--pu-radius) var(--pu-radius) 0}
-.pu-docs-content{min-width:0}
-.pu-docs-content h2{font-size:1.25rem;margin:2.25rem 0 .75rem}
-.pu-docs-content section:first-child h2,.pu-docs-content>h2:first-child{margin-top:0}
-.pu-docs-content h3{font-size:1rem;margin:1.5rem 0 .5rem}
-/* Same overflow-x:auto wrapper pattern as .pu-compare-table-wrap (the
-   calendly-alternative page) — a real <table> keeps normal browser column
-   alignment between thead/tbody, which a display:block-on-<table> trick
-   would break. Without a scrolling wrapper, a narrow viewport squeezed
-   columns instead of scrolling: paths like /api/v1/event-types and tool
-   names like list_event_types wrapped one syllable per line. */
-.pu-docs-table-wrap{overflow-x:auto;margin:0 0 1.25rem}
-.pu-docs-content table{width:100%;min-width:32rem;border-collapse:collapse;font-size:.875rem}
-.pu-docs-content th,.pu-docs-content td{text-align:left;padding:.55rem .75rem;
-  border-bottom:1px solid var(--pu-line);vertical-align:top}
-.pu-docs-content th{font-family:var(--pu-font-display);font-weight:600;font-size:.8125rem}
-.pu-docs-content table .pu-time{font-size:.8125rem;white-space:nowrap}
-.pu-docs-content ul,.pu-docs-content ol{padding-left:1.25rem;margin:0 0 1rem}
-.pu-docs-content li{margin-bottom:.4rem}
-.pu-docs-content code{font-family:var(--pu-font-mono);font-size:.875em;background:var(--pu-paper-dim);
-  border:1px solid var(--pu-line);border-radius:4px;padding:.05rem .35rem}
-
-/* Code blocks: an always-dark terminal surface (see --pu-code-* in TOKENS'
-   :root, deliberately not redefined for dark mode) so a multi-line snippet
-   reads with the same contrast whichever theme the page is in. */
-.pu-pre{background:var(--pu-code-bg);color:var(--pu-code-fg);border:1px solid var(--pu-code-line);
-  border-radius:var(--pu-radius);padding:1rem 1.1rem;overflow-x:auto;margin:0 0 1.25rem}
-.pu-pre code{display:block;font-family:var(--pu-font-mono);font-size:.8125rem;line-height:1.7;
-  color:inherit;background:none;border:0;padding:0;white-space:pre}
-
-.pu-docs-callout{background:var(--pu-status-info-bg);border:1px solid var(--pu-line);border-radius:var(--pu-radius);
-  padding:.85rem 1rem;margin:0 0 1.25rem;font-size:.9375rem}
-.pu-docs-callout p:last-child{margin-bottom:0}
-
-@media(max-width:779px){.pu-docs-nav{position:static}}
-
-/* Long unbroken tokens (URLs, API paths) must not force horizontal scroll
-   on narrow viewports — see design requirement: no horizontal scroll at 360px. */
-.pu-landing .pu-time{overflow-wrap:anywhere}
-
-@media(hover:hover){
-  .pu-feature-grid .pu-card,.pu-compare .pu-card{transition:border-color .15s ease}
-  .pu-feature-grid .pu-card:hover,.pu-compare .pu-card:hover{border-color:var(--pu-green-700)}
-}
-@media(prefers-reduced-motion:reduce){
-  .pu-feature-grid .pu-card,.pu-compare .pu-card{transition:none}
-}
+  font-size:.8125rem;margin-bottom:.25rem}
+.pu-landing-footer nav a{color:var(--pu-text-secondary);text-decoration:none}
+.pu-landing-footer nav a:hover{color:var(--pu-text-primary)}
 `

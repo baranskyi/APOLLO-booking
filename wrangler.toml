@@ -1,5 +1,5 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "punctual"
+name = "apollo-booking"
 main = "src/index.ts"
 compatibility_date = "2025-08-23"
 compatibility_flags = ["nodejs_compat"]
@@ -21,8 +21,8 @@ enabled = true
 
 [[d1_databases]]
 binding = "DB"
-database_name = "punctual"
-database_id = "<the id `wrangler d1 create punctual` printed>"
+database_name = "apollo-booking"
+database_id = "<the id `wrangler d1 create apollo-booking` printed>"
 migrations_dir = "migrations"
 
 # freeBusy cache (ADR-0006 §1) AND rendered OG card PNGs — two key
@@ -42,7 +42,7 @@ id = "<the id `wrangler kv namespace create CACHE` printed>"
 # pledge the same way D1 and KV do.
 [[r2_buckets]]
 binding = "AVATARS"
-bucket_name = "punctual-avatars"
+bucket_name = "apollo-avatars"
 
 [[durable_objects.bindings]]
 name = "HOST_CALENDAR"
@@ -60,14 +60,14 @@ new_sqlite_classes = ["HostCalendar", "RateLimiter"]
 # back to inline delivery so a self-hoster without Queues still works.
 [[queues.producers]]
 binding = "TASKS"
-queue = "punctual-tasks"
+queue = "apollo-tasks"
 
 [[queues.consumers]]
-queue = "punctual-tasks"
+queue = "apollo-tasks"
 max_batch_size = 10
 max_batch_timeout = 5
 max_retries = 5
-dead_letter_queue = "punctual-tasks-dlq"
+dead_letter_queue = "apollo-tasks-dlq"
 
 # Reminders at 24h and 1h, plus hold expiry and lock pruning.
 [triggers]
@@ -81,14 +81,14 @@ crons = ["*/5 * * * *"]
 [vars]
 # Your Worker's public origin — the URL `wrangler deploy` prints, or your
 # custom domain. Used in every link the engine writes into emails and .ics.
-BASE_URL = "https://punctual.YOUR-SUBDOMAIN.workers.dev"
-BRAND_NAME = "Punctual"
+BASE_URL = "https://apollo-booking.YOUR-SUBDOMAIN.workers.dev"
+BRAND_NAME = "APOLLO NEXT"
 # Optional: the legal entity named on /privacy and /terms (defaults to
 # BRAND_NAME), and a live booking page to embed on your landing page.
 #LEGAL_OPERATOR = "Your Company Ltd"
 #DEMO_BOOKING_PATH = "/you/30min"
 FROM_EMAIL = "scheduling@your-domain.example"
-FROM_NAME = "Punctual"
+FROM_NAME = "APOLLO NEXT"
 SUPPORT_EMAIL = "you@your-domain.example"
 # Off unless explicitly enabled (ADR-0006 §5).
 TELEMETRY_ENABLED = "0"

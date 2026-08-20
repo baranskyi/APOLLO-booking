@@ -20,6 +20,7 @@ import { effectiveQuestions } from '../../core/domain/booking-service.js'
 import { slotStateClassName } from '../../core/slot-state.js'
 import { formatInZone, localDateString, offsetLabel } from '../../core/time/zone.js'
 import { embedResizeScriptTag } from '../embed.js'
+import { apolloWordmark } from '../brand.js'
 import { pageCss } from '../styles.js'
 
 export function escapeHtml(s: string): string {
@@ -54,14 +55,14 @@ export interface PageChrome {
  */
 export function shellHead(chrome: PageChrome): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="uk">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(chrome.title)}</title>
 ${chrome.description ? `<meta name="description" content="${escapeHtml(chrome.description)}">` : ''}
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="${chrome.themeColor ?? '#0E7C4C'}">
+<meta name="theme-color" content="${chrome.themeColor ?? '#000000'}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 ${
   chrome.og
@@ -81,13 +82,15 @@ ${chrome.description ? `<meta name="twitter:description" content="${escapeHtml(c
 }
 <!-- Every face the page can use, not just two: with font-display:optional
      the first paint is final, so a face that isn't preloaded is a face the
-     visitor likely never sees on a cold cache. Inter carries all body text —
-     leaving it out is what made whole pages repaint mid-view. -->
-<link rel="preload" href="/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/schibstedgrotesk-600.woff2" as="font" type="font/woff2" crossorigin>
+     visitor likely never sees on a cold cache. Halvar carries all body text —
+     leaving it out is what made whole pages repaint mid-view. The mono
+     Cyrillic file is here for the same reason: localized dates render in
+     .pu-time, and without it every date on the page falls back. -->
+<link rel="preload" href="/fonts/halvar-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/halvar-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibmplexmono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/ibmplexmono-cyrillic-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/ibmplexmono-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/ibmplexmono-700.woff2" as="font" type="font/woff2" crossorigin>
 <style>${pageCss()}</style>
 </head>
 <body>
@@ -112,10 +115,10 @@ export function shellFoot(
   embed = false,
   operator?: string | null,
 ): string {
-  const mark = `<a class="pu-mark" href="/">${escapeHtml(brandName.toLowerCase())}<span>:</span></a>`
+  const mark = `<a class="pu-mark" href="/" aria-label="${escapeHtml(brandName)}">${apolloWordmark()}</a>`
   const foot = operator
-    ? `<p class="pu-foot">${escapeHtml(operator)} · scheduling by ${mark}</p>`
-    : `<p class="pu-foot">${mark} — scheduling that shows up on time</p>`
+    ? `<p class="pu-foot">${escapeHtml(operator)} · бронювання ${mark}</p>`
+    : `<p class="pu-foot">${mark}</p>`
   return `</div>
 ${poweredBy ? foot : ''}
 ${embed ? embedResizeScriptTag() : ''}
@@ -125,7 +128,7 @@ ${embed ? embedResizeScriptTag() : ''}
 /** Placeholder emitted with the shell, replaced when slot data arrives. */
 export function slotsSkeleton(): string {
   return `<div id="pu-slots" aria-busy="true" aria-live="polite">
-  <p class="pu-sr">Loading available times…</p>
+  <p class="pu-sr">Завантажуємо вільний час…</p>
   ${Array.from({ length: 6 }, () => '<div class="pu-skeleton"></div>').join('\n  ')}
 </div>`
 }
@@ -211,7 +214,7 @@ function identityLineHtml(d: Pick<BookingPageData, 'host' | 'eventType'>): strin
 }
 
 export function eventHeader(d: BookingPageData): string {
-  const durationLabel = `${d.eventType.durationMinutes} min`
+  const durationLabel = `${d.eventType.durationMinutes} хв`
   const location = locationLabel(d.eventType)
   const identity = identityLineHtml(d)
   const hostName = d.host.name || d.host.slug
@@ -302,7 +305,7 @@ function timezonePicker(d: BookingPageData): string {
   return `<form class="pu-tz-form" method="get" action="${escapeHtml(action)}">
     ${hiddenFields}
     ${d.embed ? '<input type="hidden" name="embed" value="1">' : ''}
-    <label class="pu-sr" for="pu-tz">Timezone</label>
+    <label class="pu-sr" for="pu-tz">Часовий пояс</label>
     <span class="pu-tz-wrap">
       <svg class="pu-tz-globe" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"
         fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -313,7 +316,7 @@ function timezonePicker(d: BookingPageData): string {
         style="width:calc(${zoneCh + offsetCh}ch + 4.5rem);padding-right:calc(${offsetCh}ch + 2.2rem)">${options}</select>
       <span class="pu-tz-offset">${escapeHtml(offset)}</span>
     </span>
-    <noscript><button type="submit" class="pu-btn pu-btn-ghost" style="padding:.15rem .5rem">Set</button></noscript>
+    <noscript><button type="submit" class="pu-btn pu-btn-ghost" style="padding:.15rem .5rem">Обрати</button></noscript>
   </form>`
 }
 
@@ -322,14 +325,29 @@ function locationLabel(et: EventType): string {
     case 'google_meet':
       return 'Google Meet'
     case 'phone':
-      return 'Phone call'
+      return 'Телефонний дзвінок'
     case 'in_person':
-      return et.locationValue ?? 'In person'
+      return et.locationValue ?? 'Особисто'
     case 'custom_link':
-      return 'Online'
+      return 'Онлайн'
     default:
       return ''
   }
+}
+
+/** Monday-first, matching the calendar order every Ukrainian reader expects. */
+const WEEKDAY_HEADS: ReadonlyArray<readonly [short: string, full: string]> = [
+  ['Пн', 'понеділок'],
+  ['Вт', 'вівторок'],
+  ['Ср', 'середа'],
+  ['Чт', 'четвер'],
+  ['Пт', "п'ятниця"],
+  ['Сб', 'субота'],
+  ['Нд', 'неділя'],
+]
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 /**
@@ -345,7 +363,9 @@ export function monthGrid(d: BookingPageData): string {
   const month = Number(mStr)
   const firstOfMonth = new Date(Date.UTC(year, month - 1, 1))
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate()
-  const leading = firstOfMonth.getUTCDay()
+  // Monday-first: getUTCDay() counts from Sunday, the Ukrainian week starts on
+  // Monday, so the leading blanks shift by one and Sunday lands last.
+  const leading = (firstOfMonth.getUTCDay() + 6) % 7
   const todayLocal = localDateString(Date.now(), d.host.tz)
 
   const cells: string[] = []
@@ -361,36 +381,41 @@ export function monthGrid(d: BookingPageData): string {
         (d.embed ? '&embed=1' : '')
       cells.push(
         `<a class="pu-day" data-has-slots="1"${current} href="${escapeHtml(href)}" ` +
-          `aria-label="${escapeHtml(humanDate(date, d.guestTimezone))}, times available">${day}</a>`,
+          `aria-label="${escapeHtml(humanDate(date, d.guestTimezone))}, є вільний час">${day}</a>`,
       )
     } else {
       cells.push(`<span class="pu-day" aria-disabled="true"${current}>${day}</span>`)
     }
   }
 
-  const monthLabel = new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(firstOfMonth)
+  // Ukrainian renders this lowercase ("серпень 2026 р."); it heads the card,
+  // so it gets a capital.
+  const monthLabel = capitalize(
+    new Intl.DateTimeFormat('uk-UA', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(firstOfMonth),
+  )
 
   const prev = shiftMonth(d.month, -1)
   const next = shiftMonth(d.month, 1)
   const base = bookingPath(d)
   const tzq = `&tz=${encodeURIComponent(d.guestTimezone)}${d.embed ? '&embed=1' : ''}`
 
-  return `<section class="pu-card" aria-label="Choose a day">
+  return `<section class="pu-card" aria-label="Обери день">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
     <a class="pu-btn pu-btn-ghost" style="padding:.35rem .6rem"
-       href="${escapeHtml(`${base}?month=${prev}${tzq}`)}" aria-label="Previous month">←</a>
+       href="${escapeHtml(`${base}?month=${prev}${tzq}`)}" aria-label="Попередній місяць">←</a>
     <h2 style="margin:0">${escapeHtml(monthLabel)}</h2>
     <a class="pu-btn pu-btn-ghost" style="padding:.35rem .6rem"
-       href="${escapeHtml(`${base}?month=${next}${tzq}`)}" aria-label="Next month">→</a>
+       href="${escapeHtml(`${base}?month=${next}${tzq}`)}" aria-label="Наступний місяць">→</a>
   </div>
   <div class="pu-cal" role="grid">
-    ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-      .map((x) => `<div class="pu-cal-head" role="columnheader" aria-label="${x}day">${x}</div>`)
-      .join('')}
+    ${WEEKDAY_HEADS.map(
+      ([short, full]) =>
+        `<div class="pu-cal-head" role="columnheader" aria-label="${full}">${short}</div>`,
+    ).join('')}
     ${cells.join('\n    ')}
   </div>
 </section>`
@@ -399,14 +424,14 @@ export function monthGrid(d: BookingPageData): string {
 /** Slot list for a chosen day, in the GUEST's timezone. */
 export function slotList(d: BookingPageData): string {
   if (!d.selectedDate) {
-    return `<section class="pu-card" aria-label="Available times">
-      <p class="pu-muted">Pick a day to see available times.</p></section>`
+    return `<section class="pu-card" aria-label="Вільний час">
+      <p class="pu-muted">Обери день — побачиш вільний час.</p></section>`
   }
   const slots = d.slots ?? []
   if (slots.length === 0) {
-    return `<section class="pu-card" aria-label="Available times">
+    return `<section class="pu-card" aria-label="Вільний час">
       <h2>${escapeHtml(humanDate(d.selectedDate, d.guestTimezone))}</h2>
-      <p class="pu-muted">No times available on this day.</p></section>`
+      <p class="pu-muted">На цей день вільних слотів немає.</p></section>`
   }
 
   // Every slot the query engine hands back here has already cleared holds,
@@ -435,10 +460,10 @@ export function slotList(d: BookingPageData): string {
     })
     .join('\n    ')
 
-  return `<section class="pu-card" aria-label="Available times">
+  return `<section class="pu-card" aria-label="Вільний час">
   <h2>${escapeHtml(humanDate(d.selectedDate, d.guestTimezone))}</h2>
   <p class="pu-muted" style="font-size:.8125rem">
-    Times shown in ${escapeHtml(d.guestTimezone)} (${escapeHtml(offsetLabel(slots[0]!.start, d.guestTimezone))})
+    Час у зоні ${escapeHtml(d.guestTimezone)} (${escapeHtml(offsetLabel(slots[0]!.start, d.guestTimezone))})
   </p>
   <div class="pu-slots">
     ${items}
@@ -483,25 +508,25 @@ export function confirmForm(
                    .join('')}
                </select>`
             : `<input id="q-${escapeHtml(q.id)}" name="q_${escapeHtml(q.id)}" value="${val}"${req}${desc}>`
-      return `<label for="q-${escapeHtml(q.id)}">${escapeHtml(q.label)}${q.required ? '' : ' <span class="pu-muted">(optional)</span>'}</label>
+      return `<label for="q-${escapeHtml(q.id)}">${escapeHtml(q.label)}${q.required ? '' : ' <span class="pu-muted">(не обовʼязково)</span>'}</label>
         ${field}
         ${err ? `<p class="pu-err" id="err-${escapeHtml(q.id)}">${escapeHtml(err)}</p>` : ''}`
     })
     .join('\n')
 
-  return `<section class="pu-card" aria-label="Confirm your booking">
-  <h2>Confirm your booking</h2>
+  return `<section class="pu-card" aria-label="Підтвердження бронювання">
+  <h2>Підтверди бронювання</h2>
   <div class="pu-slot-chosen">
     <span class="pu-dot-lg" aria-hidden="true"></span>
     <span><strong class="pu-time">${escapeHtml(when)}</strong><br>
-     <span class="pu-muted">${escapeHtml(d.guestTimezone)} · ${escapeHtml(String(et.durationMinutes))} min</span></span>
+     <span class="pu-muted">${escapeHtml(d.guestTimezone)} · ${escapeHtml(String(et.durationMinutes))} хв</span></span>
   </div>
   <form method="post" action="${escapeHtml(bookingPath(d))}/confirm">
     <input type="hidden" name="start" value="${start}">
     <input type="hidden" name="tz" value="${escapeHtml(d.guestTimezone)}">
     ${d.embed ? '<input type="hidden" name="embed" value="1">' : ''}
     ${opts.holdId ? `<input type="hidden" name="hold" value="${escapeHtml(opts.holdId)}">` : ''}
-    <label for="name">Your name</label>
+    <label for="name">Імʼя</label>
     <input id="name" name="name" required aria-required="true" autocomplete="name"
            value="${escapeHtml(values['name'] ?? '')}"
            ${errors['name'] ? 'aria-describedby="err-name"' : ''}>
@@ -513,8 +538,8 @@ export function confirmForm(
     ${errors['email'] ? `<p class="pu-err" id="err-email">${escapeHtml(errors['email'])}</p>` : ''}
     ${questions}
     <div style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap">
-      <button class="pu-btn" type="submit">Confirm booking</button>
-      <a class="pu-btn pu-btn-ghost" href="${escapeHtml(bookingPath(d))}?date=${escapeHtml(localDateString(start, d.guestTimezone))}${d.embed ? '&embed=1' : ''}">Back</a>
+      <button class="pu-btn" type="submit">Підтвердити</button>
+      <a class="pu-btn pu-btn-ghost" href="${escapeHtml(bookingPath(d))}?date=${escapeHtml(localDateString(start, d.guestTimezone))}${d.embed ? '&embed=1' : ''}">Назад</a>
     </div>
   </form>
 </section>`
@@ -535,23 +560,23 @@ export function bookedConfirmation(opts: {
     hour: 'numeric',
     minute: '2-digit',
   })
-  return `<section class="pu-card pu-confirm" aria-label="Booking confirmed">
+  return `<section class="pu-card pu-confirm" aria-label="Бронювання підтверджено">
   <svg class="pu-confirm-icon" width="56" height="56" viewBox="0 0 96 96" aria-hidden="true">
     <path class="pu-ring-arc" d="M 69.2 30.8 A 30 30 0 1 1 26.8 30.8"
       fill="none" stroke-width="9" stroke-linecap="round"></path>
     <circle class="pu-ring-dot" cx="48" cy="22" r="11"></circle>
   </svg>
-  <p><span class="pu-badge">Confirmed</span></p>
-  <h1>You're booked</h1>
-  <p class="pu-muted"><strong style="color:var(--pu-ink-950)">${escapeHtml(opts.eventTitle)}</strong> with ${escapeHtml(opts.hostName)}</p>
+  <p><span class="pu-badge">Підтверджено</span></p>
+  <h1>Заброньовано</h1>
+  <p class="pu-muted"><strong style="color:var(--pu-ink-950)">${escapeHtml(opts.eventTitle)}</strong> з ${escapeHtml(opts.hostName)}</p>
   <dl class="pu-confirm-details">
-    <div><dt>When</dt><dd class="pu-time">${escapeHtml(when)}<br>
+    <div><dt>Коли</dt><dd class="pu-time">${escapeHtml(when)}<br>
       <span class="pu-muted">${escapeHtml(opts.guestTimezone)}</span></dd></div>
-    ${opts.locationLabel ? `<div><dt>Where</dt><dd>${escapeHtml(opts.locationLabel)}</dd></div>` : ''}
+    ${opts.locationLabel ? `<div><dt>Де</dt><dd>${escapeHtml(opts.locationLabel)}</dd></div>` : ''}
   </dl>
-  <p class="pu-muted">A calendar invitation is on its way to your inbox.</p>
+  <p class="pu-muted">Запрошення вже летить на твою пошту.</p>
   <p style="margin-top:1.25rem">
-    <a class="pu-btn pu-btn-ghost" href="${escapeHtml(opts.manageUrl)}">Reschedule or cancel</a>
+    <a class="pu-btn pu-btn-ghost" href="${escapeHtml(opts.manageUrl)}">Перенести або скасувати</a>
   </p>
 </section>`
 }
@@ -565,11 +590,11 @@ export function bookedConfirmation(opts: {
  * there — not as an error.
  */
 export function slotTakenPage(d: BookingPageData, date: string): string {
-  return `<section class="pu-card" aria-label="Time no longer available">
-  <h1>That time was just taken</h1>
-  <p class="pu-muted">Someone booked it while you were filling in the form. Here are the other times that day.</p>
+  return `<section class="pu-card" aria-label="Час уже зайнятий">
+  <h1>Цей час щойно зайняли</h1>
+  <p class="pu-muted">Хтось забронював його, поки ти заповнював форму. Ось інший вільний час на цей день.</p>
   <p style="margin-top:1rem">
-    <a class="pu-btn" href="${escapeHtml(bookingPath(d))}?date=${escapeHtml(date)}&tz=${encodeURIComponent(d.guestTimezone)}${d.embed ? '&embed=1' : ''}">See available times</a>
+    <a class="pu-btn" href="${escapeHtml(bookingPath(d))}?date=${escapeHtml(date)}&tz=${encodeURIComponent(d.guestTimezone)}${d.embed ? '&embed=1' : ''}">Показати вільний час</a>
   </p>
 </section>`
 }
@@ -589,12 +614,14 @@ export function bookingPath(d: { ownerSlug: string; eventType: EventType }): str
 
 function humanDate(date: string, _tz: string): string {
   const [y, m, dd] = date.split('-').map(Number) as [number, number, number]
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(Date.UTC(y, m - 1, dd)))
+  return capitalize(
+    new Intl.DateTimeFormat('uk-UA', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(Date.UTC(y, m - 1, dd))),
+  )
 }
 
 export function shiftMonth(month: string, delta: number): string {

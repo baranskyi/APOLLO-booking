@@ -76,7 +76,7 @@ if(tz)q.push('tz='+encodeURIComponent(tz));
 q.push('embed=1');
 var f=document.createElement('iframe');
 f.src=u+(u.indexOf('?')<0?'?':'&')+q.join('&');
-f.title=d.title||'Booking page';
+f.title=d.title||'Сторінка бронювання';
 f.loading='eager';
 f.setAttribute('frameborder','0');
 f.setAttribute('allowtransparency','true');

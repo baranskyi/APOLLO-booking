@@ -1,7 +1,7 @@
 {
   "name": "@punctual/engine",
   "version": "0.1.1",
-  "description": "Edge-native scheduling engine \u2014 the complete single-team product, on Cloudflare Workers",
+  "description": "Edge-native scheduling engine — the complete single-team product, on Cloudflare Workers",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -16,13 +16,16 @@
   ],
   "scripts": {
     "dev": "node -e \"const f=require('fs');f.existsSync('.dev.vars')||f.copyFileSync('.dev.vars.example','.dev.vars')\" && wrangler dev",
-    "deploy": "wrangler deploy",
-    "migrate": "wrangler d1 migrations apply punctual",
-    "migrate:local": "wrangler d1 migrations apply punctual --local",
+    "deploy": "npm run predeploy && wrangler deploy -c wrangler.production.toml",
+    "migrate": "wrangler d1 migrations apply apollo-booking",
+    "migrate:local": "wrangler d1 migrations apply apollo-booking --local",
     "test": "vitest run",
     "test:core": "vitest run test/core",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "predeploy": "node -e \"const g=require('fs').readdirSync('assets/fonts').filter(f=>f.startsWith('halvar-'));if(!g.length){console.error('\\n  assets/fonts/halvar-*.woff2 are missing — see docs/PRIVATE.md.\\n  Deploying now would ship the system-font fallback.\\n');process.exit(1)}\"",
+    "deploy:template": "wrangler deploy",
+    "migrate:prod": "wrangler d1 migrations apply apollo-booking -c wrangler.production.toml --remote"
   },
   "dependencies": {
     "@cf-wasm/photon": "^0.4.0",

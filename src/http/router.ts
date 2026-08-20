@@ -20,8 +20,7 @@ import { buildDashboardRoutes } from './dashboard-routes.js'
 import { buildOgRoutes } from './og/route.js'
 import { buildAvatarRoutes } from './avatars/route.js'
 import { privacyPage, termsPage } from './pages/legal.js'
-import { calendlyAlternativePage, landingPage } from './pages/landing.js'
-import { docsApiPage, docsIndexPage, docsMcpPage, docsSelfHostingPage } from './pages/docs.js'
+import { landingPage } from './pages/landing.js'
 import type { EnginePorts, RequestScope } from '../ports.js'
 import type { SlotService } from '../engine.js'
 import { daysWithSlots, monthRange } from '../engine.js'
@@ -62,51 +61,11 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
       }),
     ),
   )
-  app.get('/docs', (c) =>
-    c.html(
-      docsIndexPage({
-        brandName: ports.config.brandName,
-        baseUrl: ports.config.baseUrl,
-        ...(ports.config.legalOperator ? { operator: ports.config.legalOperator } : {}),
-      }),
-    ),
-  )
-  app.get('/docs/self-hosting', (c) =>
-    c.html(
-      docsSelfHostingPage({
-        brandName: ports.config.brandName,
-        baseUrl: ports.config.baseUrl,
-        ...(ports.config.legalOperator ? { operator: ports.config.legalOperator } : {}),
-      }),
-    ),
-  )
-  app.get('/docs/api', (c) =>
-    c.html(
-      docsApiPage({
-        brandName: ports.config.brandName,
-        baseUrl: ports.config.baseUrl,
-        ...(ports.config.legalOperator ? { operator: ports.config.legalOperator } : {}),
-      }),
-    ),
-  )
-  app.get('/docs/mcp', (c) =>
-    c.html(
-      docsMcpPage({
-        brandName: ports.config.brandName,
-        baseUrl: ports.config.baseUrl,
-        ...(ports.config.legalOperator ? { operator: ports.config.legalOperator } : {}),
-      }),
-    ),
-  )
-  app.get('/calendly-alternative', (c) =>
-    c.html(
-      calendlyAlternativePage({
-        brandName: ports.config.brandName,
-        baseUrl: ports.config.baseUrl,
-        ...(ports.config.legalOperator ? { operator: ports.config.legalOperator } : {}),
-      }),
-    ),
-  )
+  // No /docs and no /calendly-alternative: this deployment is one company's
+  // internal scheduler, not a product with a public site. The self-hosting
+  // and API guides live in the repo's own docs/ where an operator reads them,
+  // and both URL families now fall through to the 404 page — "docs" is in
+  // RESERVED_SLUGS, so no host can ever claim it as a booking page either.
 
   // Programmatic surfaces. Mounted before the /:userSlug/:eventSlug catch-all
   // so a host cannot claim the slug "api" and shadow them.
@@ -138,14 +97,14 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
   })
   app.get('/privacy', (c) =>
     c.html(
-      shellHead({ title: `Privacy · ${ports.config.brandName}`, brandName: ports.config.brandName }) +
+      shellHead({ title: `Приватність · ${ports.config.brandName}`, brandName: ports.config.brandName }) +
         privacyPage(legal()) +
         shellFoot(ports.config.brandName),
     ),
   )
   app.get('/terms', (c) =>
     c.html(
-      shellHead({ title: `Terms · ${ports.config.brandName}`, brandName: ports.config.brandName }) +
+      shellHead({ title: `Умови · ${ports.config.brandName}`, brandName: ports.config.brandName }) +
         termsPage(legal()) +
         shellFoot(ports.config.brandName),
     ),
@@ -302,7 +261,7 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
     }
 
     const html =
-      shellHead({ title: `Confirm · ${eventType.title}`, brandName: ports.config.brandName }) +
+      shellHead({ title: `Підтвердження · ${eventType.title}`, brandName: ports.config.brandName }) +
       eventHeader(data) +
       confirmForm(data, start) +
       shellFoot(ports.config.brandName, true, embed, displayCompany(data))
@@ -320,8 +279,8 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
     const limit = await ports.rateLimiter.check('booking:ip', ip, 10, 3600)
     if (!limit.allowed) {
       return c.html(
-        shellHead({ title: 'Too many requests', brandName: ports.config.brandName }) +
-          errorPage('Too many bookings', 'Please wait a little and try again.') +
+        shellHead({ title: 'Забагато запитів', brandName: ports.config.brandName }) +
+          errorPage('Забагато бронювань', 'Зачекай трохи і спробуй ще раз.') +
           shellFoot(ports.config.brandName),
         429,
         { 'retry-after': String(Math.ceil((limit.resetAt - ports.clock.now()) / 1000)) },
@@ -369,16 +328,16 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
     )
     const declared = pickDeclaredAnswers(eventType, answers)
     const errors = validateAnswers(eventType, declared)
-    if (name === '') errors['name'] = 'Please tell us your name'
+    if (name === '') errors['name'] = 'Вкажи імʼя'
     // REST and MCP both cap this at 200; the public form did not. An oversized
     // name pushes the queued email past Cloudflare's 128 KB message limit, and
     // BOTH confirmations are lost while the slot stays booked.
-    else if (name.length > 200) errors['name'] = 'Please use 200 characters or fewer'
-    if (!isValidEmail(email)) errors['email'] = 'Please enter a valid email address'
+    else if (name.length > 200) errors['name'] = 'Задовго — до 200 символів'
+    if (!isValidEmail(email)) errors['email'] = 'Вкажи коректний email'
 
     if (Object.keys(errors).length > 0) {
       return c.html(
-        shellHead({ title: `Confirm · ${eventType.title}`, brandName: ports.config.brandName }) +
+        shellHead({ title: `Підтвердження · ${eventType.title}`, brandName: ports.config.brandName }) +
           eventHeader(data) +
           confirmForm(data, start, { errors, values: { name, email, ...answers }, holdId }) +
           shellFoot(ports.config.brandName, true, embed, displayCompany(data)),
@@ -406,9 +365,9 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
       const body =
         outcome.reason === 'slot_taken' || outcome.reason === 'outside_availability'
           ? slotTakenPage(data, localDateString(start, guestTimezone))
-          : errorPage('Could not complete booking', outcome.detail ?? 'Please try another time.')
+          : errorPage('Не вдалося забронювати', outcome.detail ?? 'Спробуй інший час.')
       return c.html(
-        shellHead({ title: 'Time unavailable', brandName: ports.config.brandName }) +
+        shellHead({ title: 'Час недоступний', brandName: ports.config.brandName }) +
           eventHeader(data) +
           body +
           shellFoot(ports.config.brandName, true, embed, displayCompany(data)),
@@ -422,7 +381,7 @@ export function buildRouter(ports: EnginePorts, slots: SlotService): Hono<{ Bind
       `${ports.config.baseUrl}/booking/${outcome.booking.id}` +
       (outcome.manageToken ? `?token=${encodeURIComponent(outcome.manageToken)}` : '')
     return c.html(
-      shellHead({ title: 'Booked', brandName: ports.config.brandName }) +
+      shellHead({ title: 'Заброньовано', brandName: ports.config.brandName }) +
         bookedConfirmation({
           eventTitle: eventType.title,
           hostName: host.name || host.slug,
@@ -491,8 +450,8 @@ function validDate(v: string | undefined): string | undefined {
 /** Hono's `c.html` can return a promise, so the helper mirrors that. */
 function notFound(c: Context<{ Bindings: Env }>, ports: EnginePorts): Response | Promise<Response> {
   return c.html(
-    shellHead({ title: 'Not found', brandName: ports.config.brandName }) +
-      errorPage('Not found', 'That booking page does not exist.') +
+    shellHead({ title: 'Не знайдено', brandName: ports.config.brandName }) +
+      errorPage('Не знайдено', 'Такої сторінки бронювання немає.') +
       shellFoot(ports.config.brandName),
     404,
   )
@@ -527,8 +486,8 @@ async function bookingPageRateLimited(
   const limit = await ports.rateLimiter.check('booking_page:ip', ip, 120, 60)
   if (limit.allowed) return undefined
   return c.html(
-    shellHead({ title: 'Too many requests', brandName: ports.config.brandName }) +
-      errorPage('Too many requests', 'Please wait a little and try again.') +
+    shellHead({ title: 'Забагато запитів', brandName: ports.config.brandName }) +
+      errorPage('Забагато запитів', 'Зачекай трохи і спробуй ще раз.') +
       shellFoot(ports.config.brandName),
     429,
     { 'retry-after': String(Math.ceil((limit.resetAt - ports.clock.now()) / 1000)) },
@@ -536,8 +495,10 @@ async function bookingPageRateLimited(
 }
 
 /** The colon mark on an ink tile (docs/branding). Inline to avoid an asset fetch. */
+// The masthead motif at 32px: Ignite rising off the edge of the black stage.
+// The wordmark itself is unusable this small (see brand.ts) and the brand has
+// no compact letter mark yet, so the signature shape stands in for it.
 const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-<rect width="32" height="32" rx="7" fill="#0F1512"/>
-<rect x="13" y="9" width="6" height="6" rx="2" fill="#1FC16B"/>
-<rect x="13" y="19" width="6" height="6" rx="2" fill="#1FC16B"/>
+<rect width="32" height="32" rx="8" fill="#000000"/>
+<circle cx="22" cy="22" r="9" fill="#FF6424"/>
 </svg>`

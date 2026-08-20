@@ -22,3 +22,12 @@ wrangler.production.toml
 # deployment's ids/vars/domain never belong in the public repo — see the
 # workspace CLAUDE.md hard rule 1).
 wrangler.*.toml
+
+# Commercial brand typeface — licensed to APOLLO NEXT, never in a public repo.
+# Deployed from the local filesystem via [assets]; see assets/fonts/HALVAR-README.txt
+# (matched by extension, not by a bare halvar-* glob: this repo is cloned onto
+# case-insensitive filesystems, where that glob also swallows HALVAR-README.txt)
+assets/fonts/halvar-*.woff2
+assets/fonts/halvar-*.woff
+assets/fonts/halvar-*.ttf
+assets/fonts/halvar-*.otf

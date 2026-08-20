@@ -205,10 +205,10 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
 
   function csrfRejected(c: Ctx): Response | Promise<Response> {
     return c.html(
-      shellHead({ title: 'Request not accepted', brandName }) +
+      shellHead({ title: 'Запит не прийнято', brandName }) +
         errorPage(
-          'Request not accepted',
-          'This form was submitted without a valid security token. Reload the page and try again.',
+          'Запит не прийнято',
+          'Форму надіслано без дійсного токена безпеки. Онови сторінку і спробуй ще раз.',
         ) +
         shellFoot(brandName),
       403,
@@ -268,13 +268,13 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
       // Safe to distinguish: address SYNTAX is something the sender can compute
       // themselves. Account existence is not, and is never revealed.
       return c.html(
-        loginPage({ brandName, providers, email, error: 'That does not look like an email address' }),
+        loginPage({ brandName, providers, email, error: 'Це не схоже на email' }),
         400,
       )
     }
     if (result.status === 'rate_limited') {
       return c.html(
-        loginPage({ brandName, providers, email, error: 'Too many attempts. Try again shortly.' }),
+        loginPage({ brandName, providers, email, error: 'Забагато спроб. Спробуй трохи згодом.' }),
         429,
         { 'retry-after': String(result.retryAfterSeconds) },
       )
@@ -305,7 +305,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
           error:
             result.reason === 'signups_closed'
               ? 'Sign-ups are closed on this instance. Ask its operator for access.'
-              : 'That link has expired or was already used. Request a new one.',
+              : 'Лінк протермінувався або вже використаний. Запроси новий.',
         }),
         400,
       )
@@ -462,7 +462,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         c,
         result.reason === 'signups_closed'
           ? 'Sign-ups are closed on this instance. Ask its operator for access.'
-          : 'Could not complete sign-in. Please try again.',
+          : 'Не вдалося завершити вхід. Спробуй ще раз.',
       )
     }
     return startSession(c, result.sessionToken)
@@ -718,17 +718,17 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     const errors: Record<string, string> = {}
 
     const timezone = String(form.get('timezone') ?? '').trim()
-    if (!isValidTimeZone(timezone)) errors['timezone'] = 'Not a recognised timezone name'
+    if (!isValidTimeZone(timezone)) errors['timezone'] = 'Невідома назва часового поясу'
 
     const weekly = emptyWeek()
     for (let day = 0; day < 7; day++) {
       const parsed = parseWindows(String(form.get(`day-${day}`) ?? ''))
-      if (parsed === null) errors[`day-${day}`] = 'Use ranges like 09:00-17:00, separated by commas'
+      if (parsed === null) errors[`day-${day}`] = 'Формат: 09:00-17:00, через кому'
       else weekly[day] = parsed
     }
 
     const overrides = parseOverrides(String(form.get('overrides') ?? ''))
-    if (overrides === null) errors['overrides'] = 'Use lines like 2026-12-24 10:00-14:00'
+    if (overrides === null) errors['overrides'] = 'Формат рядка: 2026-12-24 10:00-14:00'
 
     const availability: Availability = {
       userId: user.id,
@@ -756,7 +756,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         user: { ...user, tz: availability.timezone },
         csrf: c.get('csrf'),
         availability,
-        notice: 'Availability saved.',
+        notice: 'Розклад збережено.',
       }),
     )
   })
@@ -802,7 +802,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     c.html(
       teamsPage({
         ...(await teamsData(c)),
-        ...(c.req.query('created') ? { notice: 'Team created. You are its first member.' } : {}),
+        ...(c.req.query('created') ? { notice: 'Команду створено. Ти її перший учасник.' } : {}),
       }),
     ),
   )
@@ -825,17 +825,17 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     // colliding with an existing user's slug makes /that-slug/<event>
     // ambiguous. Case is refused rather than folded, as in settings.
     if (raw !== raw.toLowerCase()) {
-      errors['team-slug'] = 'Lowercase letters, numbers and hyphens only'
+      errors['team-slug'] = 'Лише малі латинські літери, цифри та дефіси'
     } else {
       const validation = validateSlug(raw)
       if (!validation.ok) {
-        errors['team-slug'] = validation.message ?? 'Not a valid slug'
+        errors['team-slug'] = validation.message ?? 'Некоректна адреса'
       } else {
         const [existingUser, existingTeam] = await Promise.all([
           repos.users.bySlug(raw),
           repos.teams.bySlug(raw),
         ])
-        if (existingUser || existingTeam) errors['team-slug'] = 'That slug is already taken'
+        if (existingUser || existingTeam) errors['team-slug'] = 'Цю адресу вже зайнято'
       }
     }
 
@@ -866,7 +866,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
           ...(await teamsData(c)),
           nameValue: name,
           slugValue: raw,
-          errors: { 'team-slug': 'That slug is already taken' },
+          errors: { 'team-slug': 'Цю адресу вже зайнято' },
         }),
         400,
       )
@@ -890,7 +890,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
 
     const target = email === '' ? null : await repos.users.byEmail(email)
     if (email === '') errors[`email-${team.id}`] = 'Enter an email address'
-    else if (!target) errors[`email-${team.id}`] = 'No user with that email on this instance'
+    else if (!target) errors[`email-${team.id}`] = 'Користувача з такою адресою тут немає'
     if (!Number.isInteger(weight) || weight < 1 || weight > 100) {
       errors[`weight-${team.id}`] = 'A whole number from 1 to 100'
     }
@@ -965,7 +965,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     await advanceBookmark(c)
     // Removing YOURSELF is allowed — the page after the write simply no
     // longer lists that team, which is the honest rendering of what happened.
-    return c.html(teamsPage({ ...(await teamsData(c)), notice: 'Member removed.' }))
+    return c.html(teamsPage({ ...(await teamsData(c)), notice: 'Учасника прибрано.' }))
   })
 
   // ===========================================================================
@@ -988,7 +988,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         csrf: c.get('csrf'),
         connections: views,
         availableProviders: ports.calendars.available(),
-        ...(c.req.query('connected') ? { notice: 'Calendar connected.' } : {}),
+        ...(c.req.query('connected') ? { notice: 'Календар підключено.' } : {}),
       }),
     )
   })
@@ -1079,7 +1079,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
           user,
           csrf: c.get('csrf'),
           keys,
-          errors: { name: 'Give the key a name you will recognise' },
+          errors: { name: 'Дай ключу назву, яку впізнаєш' },
         }),
         400,
       )
@@ -1137,11 +1137,11 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     // `validateSlug`'s own docstring), so a case difference must be refused,
     // not folded away — hence the equality check ahead of it.
     if (raw !== raw.toLowerCase()) {
-      errors['slug'] = 'Lowercase letters, numbers and hyphens only'
+      errors['slug'] = 'Лише малі латинські літери, цифри та дефіси'
     } else {
       const validation = validateSlug(raw)
       if (!validation.ok) {
-        errors['slug'] = validation.message ?? 'Not a valid slug'
+        errors['slug'] = validation.message ?? 'Некоректна адреса'
       } else {
         // The same namespace signup allocation checks (uniqueSlug in
         // auth-flows.ts) — checked against the live table, not cached, since a
@@ -1158,8 +1158,8 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
           repos.users.bySlug(raw),
           repos.teams.bySlug(raw),
         ])
-        if (existingUser && existingUser.id !== user.id) errors['slug'] = 'That slug is already taken'
-        else if (existingTeam) errors['slug'] = 'That slug is already taken'
+        if (existingUser && existingUser.id !== user.id) errors['slug'] = 'Цю адресу вже зайнято'
+        else if (existingTeam) errors['slug'] = 'Цю адресу вже зайнято'
       }
     }
 
@@ -1189,7 +1189,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
             user,
             csrf: c.get('csrf'),
             slugValue: raw,
-            errors: { slug: 'That slug is already taken' },
+            errors: { slug: 'Цю адресу вже зайнято' },
           }),
           400,
         )
@@ -1202,7 +1202,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         brandName,
         user: { ...user, slug: raw },
         csrf: c.get('csrf'),
-        notice: 'Slug updated. Links using the old address now show "not found".',
+        notice: 'Адресу змінено. Посилання на стару тепер показують «не знайдено».',
       }),
     )
   })
@@ -1224,15 +1224,15 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     const companyUrlRaw = String(form.get('company_url') ?? '').trim()
     const errors: Record<string, string> = {}
 
-    if (name.length === 0) errors['name'] = 'Name is required'
-    else if (name.length > 120) errors['name'] = 'Must be 120 characters or fewer'
-    if (jobTitleRaw.length > 120) errors['job_title'] = 'Must be 120 characters or fewer'
-    if (companyRaw.length > 120) errors['company'] = 'Must be 120 characters or fewer'
+    if (name.length === 0) errors['name'] = 'Вкажи імʼя'
+    else if (name.length > 120) errors['name'] = 'До 120 символів'
+    if (jobTitleRaw.length > 120) errors['job_title'] = 'До 120 символів'
+    if (companyRaw.length > 120) errors['company'] = 'До 120 символів'
     // The URL lands in an href on a public page — only absolute http(s), so a
     // stored value can never be a javascript:/data: scheme.
-    if (companyUrlRaw.length > 200) errors['company_url'] = 'Must be 200 characters or fewer'
+    if (companyUrlRaw.length > 200) errors['company_url'] = 'До 200 символів'
     else if (companyUrlRaw !== '' && !isHttpUrl(companyUrlRaw)) {
-      errors['company_url'] = 'Must be a full link starting with https://'
+      errors['company_url'] = 'Потрібне повне посилання, що починається з https://'
     }
 
     if (Object.keys(errors).length > 0) {
@@ -1264,7 +1264,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         brandName,
         user: { ...user, name, company, jobTitle, companyUrl },
         csrf: c.get('csrf'),
-        notice: 'Profile updated.',
+        notice: 'Профіль оновлено.',
       }),
     )
   })
@@ -1286,8 +1286,8 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     const fail = (message: string) =>
       c.html(settingsPage({ brandName, user, csrf: c.get('csrf'), errors: { avatar: message } }), 400)
 
-    if (!(file instanceof File) || file.size === 0) return fail('Choose an image to upload')
-    if (file.size > MAX_UPLOAD_BYTES) return fail('That file is larger than 5 MB')
+    if (!(file instanceof File) || file.size === 0) return fail('Обери зображення для завантаження')
+    if (file.size > MAX_UPLOAD_BYTES) return fail('Файл більший за 5 МБ')
     if (!isAllowedImageType(file.type)) return fail('PNG, JPEG or WebP images only')
 
     const bytes = new Uint8Array(await file.arrayBuffer())
@@ -1298,7 +1298,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     // parse is treated the same as "too large": it also won't decode.
     const dimensions = readImageDimensions(bytes, file.type)
     if (!dimensions || dimensions.width * dimensions.height > MAX_DECODED_PIXELS) {
-      return fail('That image is too large. Try a smaller photo.')
+      return fail('Зображення завелике. Спробуй менше фото.')
     }
 
     const originalKey = await deriveBlobKey(bytes, file.type)
@@ -1309,7 +1309,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     // write and the resize entirely.
     if (!(await ports.blobStorage.get(thumbKey))) {
       const thumb = resizeToSquareThumbnail(bytes)
-      if (!thumb) return fail('Could not process that image. Try a different file.')
+      if (!thumb) return fail('Не вдалося обробити зображення. Спробуй інший файл.')
       await ports.blobStorage.put(originalKey, bytes, file.type)
       await ports.blobStorage.put(thumbKey, thumb, THUMB_CONTENT_TYPE)
     }
@@ -1323,7 +1323,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         brandName,
         user: { ...user, avatarKey: thumbKey },
         csrf: c.get('csrf'),
-        notice: 'Photo updated.',
+        notice: 'Фото оновлено.',
       }),
     )
   })
@@ -1345,7 +1345,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         brandName,
         user: { ...user, avatarKey: null },
         csrf: c.get('csrf'),
-        notice: 'Photo removed.',
+        notice: 'Фото прибрано.',
       }),
     )
   })
@@ -1396,10 +1396,10 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
       // must not lock an operator out) — but from THIS form an empty list is
       // a mistake worth stopping, since the admin explicitly chose allowlist.
       if (parsed.mode !== 'allowlist') {
-        return renderAdmin(c, { errors: { allowlist: 'Add at least one email or @domain' } }, 400)
+        return renderAdmin(c, { errors: { allowlist: 'Додай хоча б одну адресу або @домен' } }, 400)
       }
       value = parsed.entries.join(', ')
-    } else return renderAdmin(c, { errors: { allowlist: 'Choose a sign-up mode' } }, 400)
+    } else return renderAdmin(c, { errors: { allowlist: 'Обери режим реєстрації' } }, 400)
 
     await c.get('repos').settings.set('signups', value, ports.clock.now())
     await advanceBookmark(c)
@@ -1434,7 +1434,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
         // contradict the very user list rendered under the message.
         const fresh = await repos.users.byId(target.id)
         if (fresh && fresh.role === 'admin') {
-          return renderAdmin(c, { errors: { role: 'Cannot remove the last admin.' } }, 400)
+          return renderAdmin(c, { errors: { role: 'Не можна зняти останнього адміна.' } }, 400)
         }
         return renderAdmin(c)
       }
@@ -1576,7 +1576,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
 
     return c.html(
       shellHead({ title: `Cancelled · ${brandName}`, brandName }) +
-        errorPage('Booking cancelled', 'The time has been released and the host has been notified.') +
+        errorPage('Бронювання скасовано', 'Час звільнено, організатора повідомлено.') +
         shellFoot(brandName),
     )
   })
@@ -1634,7 +1634,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
           host,
           token,
           purpose: 'reschedule',
-          error: 'That time was just taken. Pick another one.',
+          error: 'Цей час щойно зайняли. Обери інший.',
         }),
         409,
       )
@@ -1664,7 +1664,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
           host,
           token,
           purpose: 'reschedule',
-          error: 'This booking was already updated elsewhere. Refresh and try again.',
+          error: 'Це бронювання вже змінили деінде. Онови сторінку і спробуй ще раз.',
         }),
         409,
       )
@@ -1731,13 +1731,13 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
     expected?: ManageTokenPurpose,
   ): Promise<ManageResult> {
     const parsed = parseManageToken(token)
-    if (!parsed) return { ok: false, message: 'The link is incomplete or was cut short by an email client.' }
+    if (!parsed) return { ok: false, message: 'Посилання неповне або обрізане поштовим клієнтом.' }
     // A 'manage' token authorises both actions — it is what the coordinator
     // actually issues. Pinning to 'cancel'/'reschedule' made every real guest
     // link 400 on both, while the tests passed because they seeded purposes
     // production never mints.
     if (expected && parsed.purpose !== expected && parsed.purpose !== 'manage') {
-      return { ok: false, message: 'This link cannot perform that action.' }
+      return { ok: false, message: 'Це посилання не може виконати таку дію.' }
     }
 
     const result = await verifyManageToken(
@@ -1746,10 +1746,10 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
       parsed.purpose,
       ports.clock.now(),
     )
-    if (!result.ok) return { ok: false, message: 'The link is no longer valid.' }
+    if (!result.ok) return { ok: false, message: 'Посилання більше недійсне.' }
     // The token names a booking; the URL must not disagree with it.
     if (result.booking.id !== expectedBookingId) {
-      return { ok: false, message: 'The link is no longer valid.' }
+      return { ok: false, message: 'Посилання більше недійсне.' }
     }
     return { ok: true, booking: result.booking, purpose: parsed.purpose }
   }
@@ -1779,8 +1779,8 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
 
   function notFound(c: Ctx): Response | Promise<Response> {
     return c.html(
-      shellHead({ title: 'Not found', brandName }) +
-        errorPage('Not found', 'That page does not exist, or is not yours.') +
+      shellHead({ title: 'Не знайдено', brandName }) +
+        errorPage('Не знайдено', 'Такої сторінки немає, або вона не твоя.') +
         shellFoot(brandName),
       404,
     )
@@ -2075,14 +2075,14 @@ async function validateEventType(
   if (draft.ownerTeamId !== null) {
     const memberships = await repos.teams.memberships(user.id)
     if (!memberships.some((m) => m.teamId === draft.ownerTeamId)) {
-      errors['owner'] = 'You are not a member of that team'
+      errors['owner'] = 'Ти не учасник цієї команди'
     }
   }
 
   if (!/^[a-z0-9-]{1,60}$/.test(draft.slug)) {
-    errors['slug'] = 'Lowercase letters, numbers and hyphens only'
+    errors['slug'] = 'Лише малі латинські літери, цифри та дефіси'
   } else if (RESERVED_SLUGS.has(draft.slug)) {
-    errors['slug'] = 'That word is reserved'
+    errors['slug'] = 'Це слово зарезервоване'
   } else {
     // Checked against every event type, not just the visible ones: the unique
     // index does not care whether a row is active, and a duplicate would
@@ -2102,33 +2102,33 @@ async function validateEventType(
   }
 
   if (draft.durationMinutes < 5 || draft.durationMinutes > 1440 || draft.durationMinutes % 5 !== 0) {
-    errors['durationMinutes'] = 'Between 5 and 1440 minutes, in steps of 5'
+    errors['durationMinutes'] = 'Від 5 до 1440 хвилин, кроком по 5'
   }
   if (draft.slotIntervalMinutes !== null && (draft.slotIntervalMinutes < 5 || draft.slotIntervalMinutes % 5 !== 0)) {
-    errors['slotIntervalMinutes'] = 'Leave blank, or use a multiple of 5'
+    errors['slotIntervalMinutes'] = 'Залиш порожнім або вкажи кратне 5'
   }
   // The form's step="5" is a UI hint only; a raw POST bypasses it. Off-grid
   // buffers are not unsafe (slot_locks buckets floor/ceil to cover them
   // regardless), but they round up to the next 5-minute bucket and quietly
   // block more of the calendar than the host configured.
   if (draft.bufferBeforeMinutes < 0 || draft.bufferBeforeMinutes > 240 || draft.bufferBeforeMinutes % 5 !== 0) {
-    errors['bufferBeforeMinutes'] = 'Between 0 and 240 minutes, in steps of 5'
+    errors['bufferBeforeMinutes'] = 'Від 0 до 240 хвилин, кроком по 5'
   }
   if (draft.bufferAfterMinutes < 0 || draft.bufferAfterMinutes > 240 || draft.bufferAfterMinutes % 5 !== 0) {
-    errors['bufferAfterMinutes'] = 'Between 0 and 240 minutes, in steps of 5'
+    errors['bufferAfterMinutes'] = 'Від 0 до 240 хвилин, кроком по 5'
   }
   if (draft.minNoticeMinutes < 0 || draft.minNoticeMinutes > 43200) {
-    errors['minNoticeMinutes'] = 'Between 0 minutes and 30 days'
+    errors['minNoticeMinutes'] = 'Від 0 хвилин до 30 днів'
   }
   if (draft.maxHorizonDays < 1 || draft.maxHorizonDays > 730) {
-    errors['maxHorizonDays'] = 'Between 1 and 730 days'
+    errors['maxHorizonDays'] = 'Від 1 до 730 днів'
   }
   if (draft.maxPerDay !== null && (draft.maxPerDay < 1 || draft.maxPerDay > 100)) {
-    errors['maxPerDay'] = 'Leave blank for unlimited, or use 1 to 100'
+    errors['maxPerDay'] = 'Порожньо — без обмежень, або від 1 до 100'
   }
   if (parseQuestions(questionsText) === null) {
     errors['questions'] =
-      'One per line: Label | text, textarea or select | required or optional | options for select'
+      'По рядку на питання: Підпис | text, textarea або select | required або optional | варіанти для select'
   }
 
   return errors

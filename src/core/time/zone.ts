@@ -264,14 +264,26 @@ export function localTimeToInstant(date: string, minutesFromMidnight: number, ti
   )
 }
 
-/** Formatting helper for UI and .ics rendering. */
+/**
+ * Formatting helper for UI and .ics rendering — the single place every
+ * user-facing date and time in the product is worded, which is why flipping
+ * this default localizes the whole app.
+ *
+ * `hourCycle:'h23'` is pinned rather than left to the locale: Ukrainian is a
+ * 24-hour locale anyway, but a caller passing `hour12` by accident, or a
+ * future locale that isn't, would silently start printing "2:30 PM" into
+ * booking confirmations and calendar invites.
+ *
+ * NOT the same machinery as `partsFormatter` above: that one parses wall
+ * clock time for the DST engine and is deliberately locale-independent.
+ */
 export function formatInZone(
   ts: number,
   timeZone: string,
   opts: Intl.DateTimeFormatOptions = { dateStyle: 'full', timeStyle: 'short' },
-  locale = 'en-US',
+  locale = 'uk-UA',
 ): string {
-  return new Intl.DateTimeFormat(locale, { ...opts, timeZone }).format(new Date(ts))
+  return new Intl.DateTimeFormat(locale, { hourCycle: 'h23', ...opts, timeZone }).format(new Date(ts))
 }
 
 /** e.g. `GMT+5:45`. Used where the offset itself matters to the reader. */

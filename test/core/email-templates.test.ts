@@ -128,7 +128,7 @@ describe('the recipient reads their own timezone', () => {
     // underscore in the raw id reads as a system identifier, not a place,
     // in a sentence written for a guest.
     const forHost = bookingConfirmationForHost(ctx())
-    expect(forHost.text).toContain('All times shown in America/New York')
+    expect(forHost.text).toContain('Час у зоні America/New York')
     expect(forHost.text).not.toContain('America/New_York')
   })
 
@@ -208,9 +208,9 @@ describe('email-client safety', () => {
 
   it('paints the brand colours', () => {
     const html = bookingConfirmationForGuest(ctx()).html
-    expect(html).toContain('#0E7C4C') // meridian green CTA
-    expect(html).toContain('#FAFAF7') // paper
-    expect(html).toContain('#0F1512') // ink
+    expect(html).toContain('#004FE8') // Signal blue CTA
+    expect(html).toContain('#F0F0EE') // paper
+    expect(html).toContain('#000000') // ink
   })
 
   it('declares an explicit charset, so an en dash never turns to mojibake', () => {
@@ -220,7 +220,7 @@ describe('email-client safety', () => {
     // renders as "â€"" instead. The meta tag must come before any non-ASCII
     // byte can be read, so it belongs at the very top of <head>.
     const html = bookingConfirmationForGuest(ctx()).html
-    expect(html).toMatch(/^<!doctype html><html lang="en"><head><meta charset="utf-8">/)
+    expect(html).toMatch(/^<!doctype html><html lang="uk"><head><meta charset="utf-8">/)
   })
 
   it('opts out of forced dark-mode inversion via meta, not a stripped <style> block', () => {
@@ -276,19 +276,19 @@ function rowValue(html: string, label: string): string {
 describe('host company', () => {
   it('the Host row is just the name when no company is set', () => {
     const html = bookingConfirmationForGuest(ctx()).html
-    expect(rowValue(html, 'Host')).toBe(host.name)
+    expect(rowValue(html, 'Проводить')).toBe(host.name)
   })
 
   it('the Host row appends the company, comma-separated', () => {
     const html = bookingConfirmationForGuest(ctx({ host: { ...host, company: 'Acme Inc' } })).html
-    expect(rowValue(html, 'Host')).toBe(`${host.name}, Acme Inc`)
+    expect(rowValue(html, 'Проводить')).toBe(`${host.name}, Acme Inc`)
   })
 
   it('the Host row reads like a signature with a position set: name, title, company', () => {
     const html = bookingConfirmationForGuest(
       ctx({ host: { ...host, jobTitle: 'CEO', company: 'Acme Inc' } }),
     ).html
-    expect(rowValue(html, 'Host')).toBe(`${host.name}, CEO, Acme Inc`)
+    expect(rowValue(html, 'Проводить')).toBe(`${host.name}, CEO, Acme Inc`)
   })
 
   it('a team event with multiple hosts never attaches one host company to the whole list', () => {
@@ -335,7 +335,7 @@ describe('lifecycle templates', () => {
     // updated — silent about the attachment for the host without a connected
     // calendar, or whose client doesn't auto-detect it.
     const confirmed = bookingConfirmationForHost(ctx())
-    expect(confirmed.text).toContain('invite is attached')
+    expect(confirmed.text).toContain('запрошення')
 
     const moved = booking({ startUtc: START + 86_400_000, endUtc: START + 86_400_000 + 30 * 60_000 })
     const rescheduled = bookingRescheduled({
@@ -343,7 +343,7 @@ describe('lifecycle templates', () => {
       audience: 'host',
       previous: { startUtc: START, endUtc: START + 30 * 60_000 },
     })
-    expect(rescheduled.text).toContain('invite is attached')
+    expect(rescheduled.text).toContain('запрошення')
   })
 
   it('a reschedule shows both the new and the old time, in the reader zone', () => {
@@ -353,12 +353,12 @@ describe('lifecycle templates', () => {
       audience: 'guest',
       previous: { startUtc: START, endUtc: START + 30 * 60_000 },
     })
-    expect(mail.subject.startsWith('Rescheduled:')).toBe(true)
-    expect(mail.text).toContain('Previously')
+    expect(mail.subject.startsWith('Перенесено:')).toBe(true)
+    expect(mail.text).toContain('Було')
     expect(mail.text).toContain(formatWhen(START, START + 30 * 60_000, 'Europe/Kyiv'))
     expect(mail.text).toContain(formatWhen(moved.startUtc, moved.endUtc, 'Europe/Kyiv'))
     // ADR-0005 §4: the old links are dead, and the guest is told so.
-    expect(mail.text).toContain('no longer work')
+    expect(mail.text).toContain('більше не працюють')
   })
 
   it('a cancellation names who cancelled and offers a rebook link', () => {
@@ -369,19 +369,19 @@ describe('lifecycle templates', () => {
       reason: 'Travelling',
       rebookUrl: 'https://punctual.example/grace/intro',
     })
-    expect(mail.subject.startsWith('Cancelled:')).toBe(true)
-    expect(mail.text).toContain('Grace Hopper cancelled')
+    expect(mail.subject.startsWith('Скасовано:')).toBe(true)
+    expect(mail.text).toContain('Grace Hopper скасував')
     expect(mail.text).toContain('Travelling')
     expect(mail.text).toContain('https://punctual.example/grace/intro')
-    expect(mail.html).toContain('#D92D20')
+    expect(mail.html).toContain('#D41A1A')
   })
 
   it('reminders differ between 24h and 1h', () => {
     const base = { ...ctx(), audience: 'guest' as const }
     const day = bookingReminder({ ...base, when: '24h' })
     const hour = bookingReminder({ ...base, when: '1h' })
-    expect(day.subject.startsWith('Tomorrow:')).toBe(true)
-    expect(hour.subject.startsWith('In 1 hour:')).toBe(true)
+    expect(day.subject.startsWith('Завтра:')).toBe(true)
+    expect(hour.subject.startsWith('За годину:')).toBe(true)
     expect(day.text).not.toBe(hour.text)
     for (const mail of [day, hour]) expect(mail.text).toContain(timeIn(START, 'Europe/Kyiv'))
   })
@@ -408,8 +408,8 @@ describe('magicLinkEmail — ADR-0005 §3', () => {
   })
 
   it('states the expiry and carries a usable link in both parts', () => {
-    expect(mail.subject).toBe('Sign in to Punctual')
-    expect(mail.text).toContain('15 minutes')
+    expect(mail.subject).toBe('Вхід до Punctual')
+    expect(mail.text).toContain('15 хвилин')
     expect(mail.text).toContain('https://punctual.example/auth/callback?token=abc123')
     expect(mail.html).toContain('https://punctual.example/auth/callback?token=abc123')
   })

@@ -280,13 +280,13 @@ export function icsDateTimeUtc(ts: number): string {
 export function describeLocation(et: EventType): string {
   switch (et.locationType) {
     case 'google_meet':
-      return et.locationValue ?? 'Google Meet (link in the calendar invite)'
+      return et.locationValue ?? 'Google Meet (посилання у запрошенні)'
     case 'custom_link':
-      return et.locationValue ?? 'Online'
+      return et.locationValue ?? 'Онлайн'
     case 'phone':
-      return et.locationValue ? `Phone: ${et.locationValue}` : 'Phone call'
+      return et.locationValue ? `Телефон: ${et.locationValue}` : 'Телефонний дзвінок'
     case 'in_person':
-      return et.locationValue ?? 'In person'
+      return et.locationValue ?? 'Особисто'
   }
 }
 
@@ -308,7 +308,7 @@ function describeAnswers(et: EventType, booking: Booking): string[] {
 function defaultDescription(booking: Booking, et: EventType): string {
   const parts: string[] = []
   if (et.description.trim() !== '') parts.push(et.description.trim())
-  parts.push(`Guest: ${booking.guestName} <${booking.guestEmail}>`)
+  parts.push(`Гість: ${booking.guestName} <${booking.guestEmail}>`)
   const answers = describeAnswers(et, booking)
   if (answers.length > 0) parts.push(answers.join('\n'))
   return parts.join('\n\n')

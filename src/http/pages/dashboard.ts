@@ -43,6 +43,7 @@ import type { CalendarProviderName } from '../../ports.js'
 import { slotStateClassName } from '../../core/slot-state.js'
 import { formatInZone, localDateString, offsetLabel } from '../../core/time/zone.js'
 import { avatarHtml, escapeHtml, shellFoot, shellHead } from './booking.js'
+import { apolloWordmark } from '../brand.js'
 
 // ---------------------------------------------------------------------------
 // Chrome
@@ -54,16 +55,16 @@ export const CSRF_FIELD = 'csrf'
 export type NavKey = 'events' | 'availability' | 'teams' | 'connections' | 'keys' | 'settings' | 'admin'
 
 const NAV: ReadonlyArray<{ key: NavKey; href: string; label: string }> = [
-  { key: 'events', href: '/dashboard', label: 'Event types' },
-  { key: 'availability', href: '/dashboard/availability', label: 'Availability' },
-  { key: 'teams', href: '/dashboard/teams', label: 'Teams' },
-  { key: 'connections', href: '/dashboard/connections', label: 'Calendars' },
-  { key: 'keys', href: '/dashboard/api-keys', label: 'API keys' },
-  { key: 'settings', href: '/dashboard/settings', label: 'Settings' },
+  { key: 'events', href: '/dashboard', label: 'Події' },
+  { key: 'availability', href: '/dashboard/availability', label: 'Розклад' },
+  { key: 'teams', href: '/dashboard/teams', label: 'Команди' },
+  { key: 'connections', href: '/dashboard/connections', label: 'Календарі' },
+  { key: 'keys', href: '/dashboard/api-keys', label: 'API-ключі' },
+  { key: 'settings', href: '/dashboard/settings', label: 'Профіль' },
   // Rendered for admins only (shellTop filters on chrome.user.role); the
   // routes behind it are gated separately — hiding a link is not access
   // control.
-  { key: 'admin', href: '/dashboard/admin', label: 'Admin' },
+  { key: 'admin', href: '/dashboard/admin', label: 'Адмін' },
 ]
 
 /** Common shape of every authenticated page. */
@@ -96,35 +97,32 @@ function shellTop(chrome: DashboardChrome, title: string, active: NavKey | null)
   return (
     shellHead({ title: `${title} · ${chrome.brandName}`, brandName: chrome.brandName }) +
     `<header class="pu-dash-header" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
-  <a class="pu-mark" href="/dashboard">${escapeHtml(chrome.brandName.toLowerCase())}<span>:</span></a>
-  <nav aria-label="Dashboard" style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.9375rem">
+  <a class="pu-mark" href="/dashboard" aria-label="${escapeHtml(chrome.brandName)}">${apolloWordmark()}</a>
+  <nav aria-label="Меню панелі" style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.9375rem">
       ${links}
   </nav>
   <form method="post" action="/logout" style="margin:0">
     ${csrfField(chrome.csrf)}
-    <button class="pu-btn pu-btn-ghost" type="submit" style="padding:.4rem .8rem;font-size:.875rem">Sign out</button>
+    <button class="pu-btn pu-btn-ghost" type="submit" style="padding:.4rem .8rem;font-size:.875rem">Вийти</button>
   </form>
 </header>
-<p class="pu-sr">Signed in as ${escapeHtml(chrome.user.email)}</p>`
+<p class="pu-sr">Ви увійшли як ${escapeHtml(chrome.user.email)}</p>`
   )
 }
 
 function shellBottom(brandName: string): string {
-  // A utility footer, not the marketing one: the host already knows what
-  // powers this — what they reach for down here is the documentation. The
-  // wordmark links home; every other link is a page the engine serves
-  // unconditionally, so this needs no per-deployment config.
+  // A utility footer: the wordmark links home, and the only other pages worth
+  // a standing link are the legal ones the engine serves unconditionally, so
+  // this needs no per-deployment config. (The docs links that used to live
+  // here went with /docs — an operator reads those in the repo.)
   return (
     `</div>
 <footer class="pu-dash-foot">
   <div class="pu-wrap pu-dash-foot-row">
-    <a class="pu-mark" href="/">${escapeHtml(brandName.toLowerCase())}<span>:</span></a>
-    <nav aria-label="Dashboard footer">
-      <a href="/docs">Docs</a>
-      <a href="/docs/api">API</a>
-      <a href="/docs/mcp">MCP</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/terms">Terms</a>
+    <a class="pu-mark" href="/" aria-label="${escapeHtml(brandName)}">${apolloWordmark()}</a>
+    <nav aria-label="Нижнє меню">
+      <a href="/privacy">Приватність</a>
+      <a href="/terms">Умови</a>
     </nav>
   </div>
 </footer>
@@ -186,23 +184,23 @@ export function loginPage(d: LoginPageData): string {
     .join('\n    ')
 
   const body = d.sent
-    ? `<h1>Check your inbox</h1>
-  <p class="pu-muted">If that address can sign in, a link is on its way. It works once and expires in 15 minutes.</p>
-  <p style="margin-top:1.25rem"><a class="pu-btn pu-btn-ghost" href="/login">Back to sign in</a></p>`
-    : `<h1>Sign in</h1>
-  <p class="pu-muted">No password. We email you a link that works once.</p>
+    ? `<h1>Перевір пошту</h1>
+  <p class="pu-muted">Якщо ця адреса має доступ, лінк уже летить. Він одноразовий і живе 15 хвилин.</p>
+  <p style="margin-top:1.25rem"><a class="pu-btn pu-btn-ghost" href="/login">Назад до входу</a></p>`
+    : `<h1>Вхід</h1>
+  <p class="pu-muted">Без пароля. Надішлемо на пошту одноразовий лінк.</p>
   <form method="post" action="/login">
     <label for="email">Email</label>
     <input id="email" name="email" type="email" required aria-required="true" autocomplete="email"
            inputmode="email" value="${escapeHtml(d.email ?? '')}"${describedBy('email', d.error ? { email: d.error } : {})}>
     ${d.error ? `<p class="pu-err" id="err-email">${escapeHtml(d.error)}</p>` : ''}
-    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Email me a link</button></div>
+    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Надіслати лінк</button></div>
   </form>
   ${
     d.providers.length > 0
       ? `<div style="margin-top:1.5rem;border-top:1px solid var(--pu-line);padding-top:1.25rem">
-    <p class="pu-muted" style="font-size:.8125rem">Signing in asks for your name and email only. Calendar access is
-       requested later, when you connect a calendar.</p>
+    <p class="pu-muted" style="font-size:.8125rem">Під час входу запитуємо тільки імʼя та email. Доступ до календаря —
+       окремо, коли підключатимеш його.</p>
     ${buttons}
   </div>`
       : ''
@@ -254,29 +252,29 @@ export interface DashboardHomeData extends DashboardChrome {
 export function dashboardHome(d: DashboardHomeData): string {
   const events =
     d.eventTypes.length === 0
-      ? `<p class="pu-muted">No event types yet. Create one and your booking page is live.</p>`
+      ? `<p class="pu-muted">Подій ще немає. Створи одну — і сторінка бронювання запрацює.</p>`
       : d.eventTypes.map((item) => eventTypeCard(d, item)).join('\n')
 
   const upcoming =
     d.upcomingBookings.length === 0
-      ? `<p class="pu-muted">Nothing booked yet.</p>`
+      ? `<p class="pu-muted">Ще нічого не заброньовано.</p>`
       : `<ul style="list-style:none;padding:0;margin:0;display:grid;gap:.75rem">
       ${d.upcomingBookings.map((u) => upcomingRow(u, d.user.tz)).join('\n      ')}
     </ul>`
 
   return (
-    shellTop(d, 'Dashboard', 'events') +
+    shellTop(d, 'Панель', 'events') +
     (d.notice ? notice(d.notice) : '') +
     `<div class="pu-grid" style="grid-template-columns:1fr">
-  <section aria-label="Event types">
+  <section aria-label="Події">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem">
-      <h1 style="margin:0">Event types</h1>
-      <a class="pu-btn" href="/dashboard/event-types/new">New event type</a>
+      <h1 style="margin:0">Події</h1>
+      <a class="pu-btn" href="/dashboard/event-types/new">Нова подія</a>
     </div>
     <div style="display:grid;gap:1rem">${events}</div>
   </section>
-  <section class="pu-card" aria-label="Upcoming bookings">
-    <h2>Upcoming</h2>
+  <section class="pu-card" aria-label="Найближчі бронювання">
+    <h2>Найближчі</h2>
     <p class="pu-muted" style="font-size:.8125rem">Times in ${escapeHtml(d.user.tz)} (${escapeHtml(offsetLabel(Date.now(), d.user.tz))})</p>
     ${upcoming}
   </section>
@@ -297,7 +295,7 @@ export function dashboardHome(d: DashboardHomeData): string {
  */
 function copyButton(value: string): string {
   return `<button type="button" class="pu-btn pu-btn-ghost pu-copy" data-copy="${escapeHtml(value)}"
-    onclick="var b=this,f=function(){var i=b.parentElement.querySelector('input');i.focus();i.select()};if(navigator.clipboard){navigator.clipboard.writeText(b.dataset.copy).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)}).catch(f)}else{f()}">Copy</button>`
+    onclick="var b=this,f=function(){var i=b.parentElement.querySelector('input');i.focus();i.select()};if(navigator.clipboard){navigator.clipboard.writeText(b.dataset.copy).then(function(){b.textContent='Скопійовано';setTimeout(function(){b.textContent='Копіювати'},1500)}).catch(f)}else{f()}">Копіювати</button>`
 }
 
 function eventTypeCard(d: DashboardHomeData, item: EventTypeListItem): string {
@@ -309,7 +307,7 @@ function eventTypeCard(d: DashboardHomeData, item: EventTypeListItem): string {
     <h2 style="margin:0">${escapeHtml(et.title)}</h2>
     <div style="display:flex;gap:.5rem">
       ${item.teamName ? `<span class="pu-badge">${escapeHtml(item.teamName)}</span>` : ''}
-      ${et.active ? '' : '<span class="pu-badge" style="background:var(--pu-paper-dim);color:var(--pu-ink-500)">Hidden</span>'}
+      ${et.active ? '' : '<span class="pu-badge" style="background:var(--pu-paper-dim);color:var(--pu-ink-500)">Прихована</span>'}
     </div>
   </div>
   <ul class="pu-meta">
@@ -317,13 +315,13 @@ function eventTypeCard(d: DashboardHomeData, item: EventTypeListItem): string {
     <li>${escapeHtml(schedulingLabel(et))}</li>
     <li>${escapeHtml(locationLabel(et))}</li>
   </ul>
-  <label for="${inputId}">Public link</label>
+  <label for="${inputId}">Публічне посилання</label>
   <div class="pu-url">
     <input id="${inputId}" class="pu-url-input" readonly value="${escapeHtml(url)}" onclick="this.select()">
     ${copyButton(url)}
   </div>
   <div style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap">
-    <a class="pu-btn pu-btn-ghost" href="/dashboard/event-types/${encodeURIComponent(et.id)}">Edit</a>
+    <a class="pu-btn pu-btn-ghost" href="/dashboard/event-types/${encodeURIComponent(et.id)}">Редагувати</a>
     <a class="pu-btn pu-btn-ghost" href="${escapeHtml(url)}">Preview</a>
   </div>
 </article>`
@@ -347,11 +345,11 @@ function upcomingRow(u: UpcomingBooking, tz: string): string {
 function schedulingLabel(et: EventType): string {
   switch (et.schedulingType) {
     case 'round_robin':
-      return 'Round robin'
+      return 'Почергово'
     case 'collective':
-      return 'Collective'
+      return 'Разом'
     default:
-      return 'Personal'
+      return 'Особиста'
   }
 }
 
@@ -360,11 +358,11 @@ function locationLabel(et: EventType): string {
     case 'google_meet':
       return 'Google Meet'
     case 'phone':
-      return 'Phone call'
+      return 'Телефонний дзвінок'
     case 'in_person':
-      return et.locationValue ?? 'In person'
+      return et.locationValue ?? 'Особисто'
     default:
-      return et.locationValue ?? 'Online'
+      return et.locationValue ?? 'Онлайн'
   }
 }
 
@@ -392,9 +390,9 @@ export interface EventTypeFormData extends DashboardChrome {
 
 const LOCATION_OPTIONS: ReadonlyArray<{ value: EventType['locationType']; label: string }> = [
   { value: 'google_meet', label: 'Google Meet' },
-  { value: 'custom_link', label: 'Custom link' },
-  { value: 'phone', label: 'Phone call' },
-  { value: 'in_person', label: 'In person' },
+  { value: 'custom_link', label: 'Своє посилання' },
+  { value: 'phone', label: 'Телефонний дзвінок' },
+  { value: 'in_person', label: 'Особисто' },
 ]
 
 export function eventTypeForm(d: EventTypeFormData): string {
@@ -412,18 +410,18 @@ export function eventTypeForm(d: EventTypeFormData): string {
     v === null || v === undefined ? fallback : String(v)
 
   return (
-    shellTop(d, editing ? 'Edit event type' : 'New event type', 'events') +
-    `<section class="pu-card" aria-label="${editing ? 'Edit event type' : 'New event type'}">
-  <h1>${editing ? 'Edit event type' : 'New event type'}</h1>
+    shellTop(d, editing ? 'Редагувати подію' : 'Нова подія', 'events') +
+    `<section class="pu-card" aria-label="${editing ? 'Редагувати подію' : 'Нова подія'}">
+  <h1>${editing ? 'Редагувати подію' : 'Нова подія'}</h1>
   <form method="post" action="${escapeHtml(action)}">
     ${csrfField(d.csrf)}
 
-    <label for="title">Title</label>
+    <label for="title">Назва</label>
     <input id="title" name="title" required aria-required="true" maxlength="120"
            value="${escapeHtml(et?.title ?? '')}"${describedBy('title', errors)}>
     ${fieldError('title', errors)}
 
-    <label for="slug">URL slug</label>
+    <label for="slug">URL-адреса</label>
     <input id="slug" name="slug" required aria-required="true" maxlength="60" pattern="[a-z0-9\-]+"
            value="${escapeHtml(et?.slug ?? '')}"${describedBy('slug', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
@@ -432,59 +430,59 @@ export function eventTypeForm(d: EventTypeFormData): string {
 
     ${ownershipFields(d, teams, errors)}
 
-    <label for="description">Description</label>
+    <label for="description">Опис</label>
     <textarea id="description" name="description" maxlength="2000"${describedBy('description', errors)}>${escapeHtml(et?.description ?? '')}</textarea>
     ${fieldError('description', errors)}
 
     <div class="pu-grid" style="grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:0 1rem">
       <div>
-        <label for="durationMinutes">Duration (minutes)</label>
+        <label for="durationMinutes">Тривалість (хвилин)</label>
         <input id="durationMinutes" name="durationMinutes" type="number" min="5" max="1440" step="5"
                required aria-required="true" value="${escapeHtml(num(et?.durationMinutes, '30'))}"${describedBy('durationMinutes', errors)}>
         <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">A multiple of 5 — the booking grid is 5-minute buckets.</p>
         ${fieldError('durationMinutes', errors)}
       </div>
       <div>
-        <label for="slotIntervalMinutes">Slot interval (minutes)</label>
+        <label for="slotIntervalMinutes">Крок сітки (хвилин)</label>
         <input id="slotIntervalMinutes" name="slotIntervalMinutes" type="number" min="5" max="1440" step="5"
                value="${escapeHtml(num(et?.slotIntervalMinutes, ''))}"${describedBy('slotIntervalMinutes', errors)}>
-        <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Blank means one slot per duration.</p>
+        <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Порожньо — один слот на тривалість.</p>
         ${fieldError('slotIntervalMinutes', errors)}
       </div>
       <div>
-        <label for="bufferBeforeMinutes">Buffer before (minutes)</label>
+        <label for="bufferBeforeMinutes">Буфер до (хвилин)</label>
         <input id="bufferBeforeMinutes" name="bufferBeforeMinutes" type="number" min="0" max="240" step="5"
                value="${escapeHtml(num(et?.bufferBeforeMinutes, '0'))}"${describedBy('bufferBeforeMinutes', errors)}>
         ${fieldError('bufferBeforeMinutes', errors)}
       </div>
       <div>
-        <label for="bufferAfterMinutes">Buffer after (minutes)</label>
+        <label for="bufferAfterMinutes">Буфер після (хвилин)</label>
         <input id="bufferAfterMinutes" name="bufferAfterMinutes" type="number" min="0" max="240" step="5"
                value="${escapeHtml(num(et?.bufferAfterMinutes, '0'))}"${describedBy('bufferAfterMinutes', errors)}>
         ${fieldError('bufferAfterMinutes', errors)}
       </div>
       <div>
-        <label for="minNoticeMinutes">Minimum notice (minutes)</label>
+        <label for="minNoticeMinutes">Мінімум часу до зустрічі (хвилин)</label>
         <input id="minNoticeMinutes" name="minNoticeMinutes" type="number" min="0" max="43200" step="5"
                value="${escapeHtml(num(et?.minNoticeMinutes, '60'))}"${describedBy('minNoticeMinutes', errors)}>
         ${fieldError('minNoticeMinutes', errors)}
       </div>
       <div>
-        <label for="maxHorizonDays">Bookable up to (days ahead)</label>
+        <label for="maxHorizonDays">Бронювати наперед (днів)</label>
         <input id="maxHorizonDays" name="maxHorizonDays" type="number" min="1" max="730"
                value="${escapeHtml(num(et?.maxHorizonDays, '60'))}"${describedBy('maxHorizonDays', errors)}>
         ${fieldError('maxHorizonDays', errors)}
       </div>
       <div>
-        <label for="maxPerDay">Maximum per day</label>
+        <label for="maxPerDay">Максимум на день</label>
         <input id="maxPerDay" name="maxPerDay" type="number" min="1" max="100"
                value="${escapeHtml(num(et?.maxPerDay, ''))}"${describedBy('maxPerDay', errors)}>
-        <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Blank means unlimited. Counted per host-local day.</p>
+        <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Порожньо — без обмежень. Рахується за днем у твоєму поясі.</p>
         ${fieldError('maxPerDay', errors)}
       </div>
     </div>
 
-    <label for="locationType">Location</label>
+    <label for="locationType">Місце</label>
     <select id="locationType" name="locationType"${describedBy('locationType', errors)}>
       ${LOCATION_OPTIONS.map(
         (o) =>
@@ -493,14 +491,14 @@ export function eventTypeForm(d: EventTypeFormData): string {
     </select>
     ${fieldError('locationType', errors)}
 
-    <label for="locationValue">Location details</label>
+    <label for="locationValue">Деталі місця</label>
     <input id="locationValue" name="locationValue" maxlength="500"
            value="${escapeHtml(et?.locationValue ?? '')}"${describedBy('locationValue', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
       The meeting URL, phone number or address. Ignored for Google Meet, which mints its own link.</p>
     ${fieldError('locationValue', errors)}
 
-    <label for="questions">Custom questions</label>
+    <label for="questions">Власні питання</label>
     <textarea id="questions" name="questions" rows="5"${describedBy('questions', errors)}>${escapeHtml(d.questionsText ?? formatQuestions(et?.questions ?? []))}</textarea>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
       One per line: <code>Label | text|textarea|select | required|optional | option, option</code>.
@@ -510,12 +508,12 @@ export function eventTypeForm(d: EventTypeFormData): string {
     <label for="active" style="display:flex;align-items:center;gap:.5rem;margin-top:1rem">
       <input id="active" name="active" type="checkbox" value="1" style="width:auto"
              ${et === undefined || et.active ? 'checked' : ''}>
-      <span>Visible on the booking page</span>
+      <span>Показувати на сторінці бронювання</span>
     </label>
 
     <div style="margin-top:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap">
-      <button class="pu-btn" type="submit">${editing ? 'Save changes' : 'Create event type'}</button>
-      <a class="pu-btn pu-btn-ghost" href="/dashboard">Cancel</a>
+      <button class="pu-btn" type="submit">${editing ? 'Зберегти' : 'Створити подію'}</button>
+      <a class="pu-btn pu-btn-ghost" href="/dashboard">Скасувати</a>
     </div>
   </form>
 </section>
@@ -524,9 +522,9 @@ ${
     ? `<form class="pu-card" method="post" style="margin-top:1.5rem"
         action="/dashboard/event-types/${encodeURIComponent(et!.id)}/delete">
   ${csrfField(d.csrf)}
-  <h2>Delete this event type</h2>
-  <p class="pu-muted">Existing bookings stay; the page stops accepting new ones.</p>
-  <button class="pu-btn pu-btn-danger" type="submit">Delete event type</button>
+  <h2>Видалити цю подію</h2>
+  <p class="pu-muted">Наявні бронювання лишаться; сторінка перестане приймати нові.</p>
+  <button class="pu-btn pu-btn-danger" type="submit">Видалити подію</button>
 </form>`
     : ''
 }` +
@@ -555,9 +553,9 @@ function ownershipFields(d: EventTypeFormData, teams: Team[], errors: Record<str
     .join('\n      ')
   return `<div class="pu-grid" style="grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:0 1rem">
       <div>
-        <label for="owner">Owner</label>
+        <label for="owner">Власник</label>
         <select id="owner" name="owner"${describedBy('owner', errors)}>
-      <option value=""${et?.ownerTeamId ? '' : ' selected'}>Me (personal)</option>
+      <option value=""${et?.ownerTeamId ? '' : ' selected'}>Я (особиста)</option>
       ${teamOptions}
     </select>
         <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
@@ -565,10 +563,10 @@ function ownershipFields(d: EventTypeFormData, teams: Team[], errors: Record<str
         ${fieldError('owner', errors)}
       </div>
       <div>
-        <label for="schedulingType">Scheduling</label>
+        <label for="schedulingType">Спосіб призначення</label>
         <select id="schedulingType" name="schedulingType"${describedBy('schedulingType', errors)}>
-      <option value="round_robin"${et?.schedulingType === 'collective' ? '' : ' selected'}>Round robin — one member takes each booking</option>
-      <option value="collective"${et?.schedulingType === 'collective' ? ' selected' : ''}>Collective — every member attends</option>
+      <option value="round_robin"${et?.schedulingType === 'collective' ? '' : ' selected'}>Почергово — кожне бронювання бере один учасник</option>
+      <option value="collective"${et?.schedulingType === 'collective' ? ' selected' : ''}>Разом — присутні всі учасники</option>
     </select>
         <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
           Applies when a team owns the event. Ignored for a personal one.</p>
@@ -581,15 +579,24 @@ function ownershipFields(d: EventTypeFormData, teams: Team[], errors: Record<str
 // Availability
 // ---------------------------------------------------------------------------
 
+/**
+ * Indexed by `WeeklySchedule`'s own day numbering, which starts at Sunday —
+ * the field names (`day-${index}`) bind to it and dashboard-routes.ts parses
+ * them back by index, so this array must NOT be reordered. Display order is a
+ * separate concern; see DAY_DISPLAY_ORDER.
+ */
 const DAY_NAMES: readonly string[] = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
+  'Неділя',
+  'Понеділок',
+  'Вівторок',
+  'Середа',
+  'Четвер',
+  "П'ятниця",
+  'Субота',
 ]
+
+/** Monday first, the way the week reads in Ukrainian. Values are DAY_NAMES indices. */
+const DAY_DISPLAY_ORDER: readonly number[] = [1, 2, 3, 4, 5, 6, 0]
 
 /** Enough to cover most hosts without shipping the whole tz database. */
 const COMMON_ZONES: readonly string[] = [
@@ -623,7 +630,8 @@ export interface AvailabilityPageData extends DashboardChrome {
 
 export function availabilityPage(d: AvailabilityPageData): string {
   const errors = d.errors ?? {}
-  const rows = DAY_NAMES.map((name, index) => {
+  const rows = DAY_DISPLAY_ORDER.map((index) => {
+    const name = DAY_NAMES[index] as string
     const id = `day-${index}`
     const windows = d.availability.weekly[index] ?? []
     return `<div>
@@ -637,14 +645,14 @@ export function availabilityPage(d: AvailabilityPageData): string {
   const zones = [...new Set([d.availability.timezone, ...COMMON_ZONES])]
 
   return (
-    shellTop(d, 'Availability', 'availability') +
+    shellTop(d, 'Розклад', 'availability') +
     (d.notice ? notice(d.notice) : '') +
-    `<section class="pu-card" aria-label="Weekly availability">
-  <h1>Availability</h1>
+    `<section class="pu-card" aria-label="Тижневий розклад">
+  <h1>Розклад</h1>
   <form method="post" action="/dashboard/availability">
     ${csrfField(d.csrf)}
 
-    <label for="timezone">Timezone</label>
+    <label for="timezone">Часовий пояс</label>
     <input id="timezone" name="timezone" list="pu-zones" required aria-required="true"
            value="${escapeHtml(d.availability.timezone)}"${describedBy('timezone', errors)}>
     <datalist id="pu-zones">
@@ -654,20 +662,20 @@ export function availabilityPage(d: AvailabilityPageData): string {
       Your weekly hours below are read in this zone, so they follow you through daylight saving.</p>
     ${fieldError('timezone', errors)}
 
-    <h2 style="margin-top:1.5rem">Weekly hours</h2>
+    <h2 style="margin-top:1.5rem">Робочі години</h2>
     <p class="pu-muted" style="font-size:.8125rem">
       Comma-separated 24-hour ranges, for example <code>09:00-12:00, 13:00-17:00</code>. Leave a day blank for a day off.</p>
     ${rows}
 
-    <h2 style="margin-top:1.5rem">Date overrides</h2>
-    <label for="overrides">Specific dates</label>
+    <h2 style="margin-top:1.5rem">Винятки за датами</h2>
+    <label for="overrides">Конкретні дати</label>
     <textarea id="overrides" name="overrides" rows="5" placeholder="2026-12-24"${describedBy('overrides', errors)}>${escapeHtml(formatOverrides(d.availability.overrides))}</textarea>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
       One per line: <code>YYYY-MM-DD 10:00-14:00</code>. A date with no ranges is a day off, and an override
       replaces that day's weekly hours entirely.</p>
     ${fieldError('overrides', errors)}
 
-    <div style="margin-top:1.5rem"><button class="pu-btn" type="submit">Save availability</button></div>
+    <div style="margin-top:1.5rem"><button class="pu-btn" type="submit">Зберегти розклад</button></div>
   </form>
 </section>` +
     shellBottom(d.brandName)
@@ -705,34 +713,34 @@ export function teamsPage(d: TeamsPageData): string {
   const errors = d.errors ?? {}
   const cards =
     d.teams.length === 0
-      ? `<p class="pu-muted">No teams yet. A team owns round-robin and collective event types —
-       create one below, then pick it as the owner on an event type.</p>`
+      ? `<p class="pu-muted">Команд ще немає. Команда володіє почерговими та спільними подіями —
+       створи її нижче, потім обери власником події.</p>`
       : d.teams.map((view) => teamCard(d, view)).join('\n')
 
   return (
-    shellTop(d, 'Teams', 'teams') +
+    shellTop(d, 'Команди', 'teams') +
     (d.notice ? notice(d.notice) : '') +
-    `<section aria-label="Teams">
-  <h1>Teams</h1>
-  <p class="pu-muted">A team owns round-robin and collective event types, booked at
-    /&lt;team-slug&gt;/&lt;event&gt;. Any member can manage the team's members.
-    Deleting a team is not supported here yet.</p>
+    `<section aria-label="Команди">
+  <h1>Команди</h1>
+  <p class="pu-muted">Команда володіє почерговими та спільними подіями за адресою
+    /&lt;команда&gt;/&lt;подія&gt;. Будь-який учасник може керувати складом.
+    Видалення команди поки не підтримується.</p>
   <div style="display:grid;gap:1rem">${cards}</div>
   <form class="pu-card" method="post" action="/dashboard/teams" style="margin-top:1.5rem">
     ${csrfField(d.csrf)}
-    <h2>Create a team</h2>
-    <label for="team-name">Name</label>
+    <h2>Створити команду</h2>
+    <label for="team-name">Назва</label>
     <input id="team-name" name="name" required aria-required="true" maxlength="120"
            value="${escapeHtml(d.nameValue ?? '')}"${describedBy('team-name', errors)}>
     ${fieldError('team-name', errors)}
-    <label for="team-slug">URL slug</label>
+    <label for="team-slug">URL-адреса</label>
     <input id="team-slug" name="slug" required aria-required="true" maxlength="40" pattern="[a-z0-9\-]+"
            value="${escapeHtml(d.slugValue ?? '')}"${describedBy('team-slug', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
       Lowercase letters, numbers and hyphens, 2&ndash;40 characters. It becomes the first part of the
       team's booking links: /&lt;slug&gt;/&lt;event&gt;. You join as the first member.</p>
     ${fieldError('team-slug', errors)}
-    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Create team</button></div>
+    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Створити команду</button></div>
   </form>
 </section>` +
     shellBottom(d.brandName)
@@ -754,11 +762,11 @@ function teamCard(d: TeamsPageData, view: TeamView): string {
       // reasoning as the admin page's last-admin row).
       const action =
         view.members.length <= 1
-          ? '<span class="pu-muted">Only member</span>'
+          ? '<span class="pu-muted">Єдиний учасник</span>'
           : `<form method="post" style="margin:0"
             action="/dashboard/teams/${teamId}/members/${encodeURIComponent(m.member.userId)}/remove">
             ${csrfField(d.csrf)}
-            <button class="pu-btn pu-btn-ghost" type="submit" style="padding:.3rem .6rem;font-size:.8125rem">Remove</button>
+            <button class="pu-btn pu-btn-ghost" type="submit" style="padding:.3rem .6rem;font-size:.8125rem">Прибрати</button>
           </form>`
       return `<tr>
         <td>${escapeHtml(label)}${email ? `<br><span class="pu-muted" style="font-size:.8125rem">${escapeHtml(email)}</span>` : ''}</td>
@@ -775,8 +783,8 @@ function teamCard(d: TeamsPageData, view: TeamView): string {
   </div>
   ${fieldError(`members-${team.id}`, errors)}
   <div class="pu-docs-table-wrap"><table style="width:100%">
-    <thead><tr><th scope="col" style="text-align:left">Member</th>
-      <th scope="col" style="text-align:left">Weight</th><th scope="col" style="text-align:left"></th></tr></thead>
+    <thead><tr><th scope="col" style="text-align:left">Учасник</th>
+      <th scope="col" style="text-align:left">Вага</th><th scope="col" style="text-align:left"></th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>
   <form method="post" action="/dashboard/teams/${teamId}/members" style="margin-top:1rem">
@@ -798,7 +806,7 @@ function teamCard(d: TeamsPageData, view: TeamView): string {
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
       Anyone with an account on this instance. A higher weight takes a proportionally larger share of
       round-robin bookings. Adding someone already on the team updates their weight.</p>
-    <div style="margin-top:.75rem"><button class="pu-btn" type="submit">Add member</button></div>
+    <div style="margin-top:.75rem"><button class="pu-btn" type="submit">Додати учасника</button></div>
   </form>
 </article>`
 }
@@ -827,29 +835,29 @@ export interface ConnectionsPageData extends DashboardChrome {
 export function connectionsPage(d: ConnectionsPageData): string {
   const cards =
     d.connections.length === 0
-      ? `<p class="pu-muted">No calendars connected. Bookings still work — nothing will be checked for conflicts.</p>`
+      ? `<p class="pu-muted">Календарів не підключено. Бронювання працюють — просто ніхто не перевіряє накладки.</p>`
       : d.connections.map((c) => connectionCard(d, c)).join('\n')
 
   const connectButtons =
     d.availableProviders.length === 0
-      ? `<p class="pu-muted">No calendar provider is configured on this deployment. Set the provider's
-       client id and secret to enable connecting.</p>`
+      ? `<p class="pu-muted">На цьому сервері не налаштовано жодного провайдера календарів. Додай client id
+       і secret, щоб зʼявилося підключення.</p>`
       : d.availableProviders
           .map(
             (p) =>
-              `<a class="pu-btn" style="margin-right:.75rem" href="/auth/${p}/start?purpose=calendar">Connect ${escapeHtml(providerLabel(p))} Calendar</a>`,
+              `<a class="pu-btn" style="margin-right:.75rem" href="/auth/${p}/start?purpose=calendar">Підключити ${escapeHtml(providerLabel(p))} Calendar</a>`,
           )
           .join('\n    ')
 
   return (
-    shellTop(d, 'Calendars', 'connections') +
+    shellTop(d, 'Календарі', 'connections') +
     (d.notice ? notice(d.notice) : '') +
-    `<section aria-label="Connected calendars">
-  <h1>Calendars</h1>
-  <p class="pu-muted">Calendars you read are checked for conflicts. The calendar you write to receives the booking.</p>
+    `<section aria-label="Підключені календарі">
+  <h1>Календарі</h1>
+  <p class="pu-muted">Календарі на читання перевіряються на накладки. У календар на запис потрапляє саме бронювання.</p>
   <div style="display:grid;gap:1rem">${cards}</div>
   <div class="pu-card" style="margin-top:1.5rem">
-    <h2>Connect another calendar</h2>
+    <h2>Підключити ще календар</h2>
     <p class="pu-muted" style="font-size:.8125rem">
       Connecting asks for calendar permissions. Signing in never does — they are separate grants, so revoking
       one does not affect the other.</p>
@@ -882,7 +890,7 @@ function connectionCard(d: ConnectionsPageData, view: ConnectionView): string {
     .join('\n      ')
 
   const writeOptions = [
-    `<option value=""${c.calendarIdWrite === null ? ' selected' : ''}>Do not write events</option>`,
+    `<option value=""${c.calendarIdWrite === null ? ' selected' : ''}>Не записувати події</option>`,
     ...calendars.map(
       (cal) =>
         `<option value="${escapeHtml(cal.id)}"${c.calendarIdWrite === cal.id ? ' selected' : ''}>${escapeHtml(cal.name)}</option>`,
@@ -898,34 +906,34 @@ function connectionCard(d: ConnectionsPageData, view: ConnectionView): string {
   ${
     c.syncStatus === 'needs_reconnect'
       ? `<div style="margin:.75rem 0" role="alert">
-    <p class="pu-err" style="font-size:.9375rem">Access was revoked or expired. Conflicts from this calendar are not
-       being checked and new bookings are not written to it.</p>
-    <a class="pu-btn" href="/auth/${c.provider}/start?purpose=calendar">Reconnect ${escapeHtml(providerLabel(c.provider))}</a>
+    <p class="pu-err" style="font-size:.9375rem">Доступ відкликано або він протермінувався. Накладки з цього календаря
+       не перевіряються, нові бронювання в нього не пишуться.</p>
+    <a class="pu-btn" href="/auth/${c.provider}/start?purpose=calendar">Перепідключити ${escapeHtml(providerLabel(c.provider))}</a>
   </div>`
       : ''
   }
   <form method="post" action="/dashboard/connections/${id}">
     ${csrfField(d.csrf)}
     <fieldset style="border:0;padding:0;margin:1rem 0 0">
-      <legend style="font-size:.875rem;font-weight:600;padding:0">Check these for conflicts</legend>
-      ${readRows || '<p class="pu-muted">No calendars to list.</p>'}
+      <legend style="font-size:.875rem;font-weight:600;padding:0">Перевіряти на конфлікти</legend>
+      ${readRows || '<p class="pu-muted">Календарів немає.</p>'}
     </fieldset>
     <label for="write-${escapeHtml(c.id)}">Write bookings to</label>
     <select id="write-${escapeHtml(c.id)}" name="write">
         ${writeOptions}
     </select>
-    <div style="margin-top:1rem"><button class="pu-btn" type="submit">Save</button></div>
+    <div style="margin-top:1rem"><button class="pu-btn" type="submit">Зберегти</button></div>
   </form>
   <form method="post" action="/dashboard/connections/${id}/disconnect" style="margin-top:.75rem">
     ${csrfField(d.csrf)}
-    <button class="pu-btn pu-btn-danger" type="submit">Disconnect</button>
+    <button class="pu-btn pu-btn-danger" type="submit">Відключити</button>
   </form>
 </article>`
 }
 
 function syncBadge(c: CalendarConnection): string {
-  if (c.syncStatus === 'ok') return '<span class="pu-badge">Connected</span>'
-  const label = c.syncStatus === 'needs_reconnect' ? 'Needs reconnect' : 'Sync error'
+  if (c.syncStatus === 'ok') return '<span class="pu-badge">Підключено</span>'
+  const label = c.syncStatus === 'needs_reconnect' ? 'Потрібне перепідключення' : 'Помилка синхронізації'
   return `<span class="pu-badge" style="background:var(--pu-paper-dim);color:var(--pu-danger)">${label}</span>`
 }
 
@@ -949,20 +957,20 @@ export function apiKeysPage(d: ApiKeysPageData): string {
 
   const list =
     d.keys.length === 0
-      ? '<p class="pu-muted">No API keys yet.</p>'
+      ? '<p class="pu-muted">Ключів ще немає.</p>'
       : `<ul style="list-style:none;padding:0;margin:0;display:grid;gap:.75rem">
       ${d.keys.map((k) => apiKeyRow(d, k)).join('\n      ')}
     </ul>`
 
   return (
-    shellTop(d, 'API keys', 'keys') +
+    shellTop(d, 'API-ключі', 'keys') +
     (d.newKey
-      ? `<section class="pu-card" role="alert" aria-label="Your new API key"
+      ? `<section class="pu-card" role="alert" aria-label="Твій новий API-ключ"
     style="border-color:var(--pu-green-700);margin-bottom:1.5rem">
-  <h2>Copy your key now</h2>
-  <p><strong>This is the only time it will be shown.</strong> We store only a hash of it, so if you lose it
-     you will have to create a new one.</p>
-  <label for="new-key">New API key</label>
+  <h2>Скопіюй ключ зараз</h2>
+  <p><strong>Показуємо його лише раз.</strong> Ми зберігаємо тільки хеш, тож якщо загубиш —
+     доведеться створити новий.</p>
+  <label for="new-key">Новий API-ключ</label>
   <div class="pu-url">
     <input id="new-key" class="pu-url-input" readonly value="${escapeHtml(d.newKey)}" onclick="this.select()">
     ${copyButton(d.newKey)}
@@ -970,22 +978,22 @@ export function apiKeysPage(d: ApiKeysPageData): string {
 </section>`
       : '') +
     `<section aria-label="API keys">
-  <h1>API keys</h1>
-  <p class="pu-muted">Keys authenticate the REST API and the MCP server. An agent's authority is exactly its key's scopes.</p>
+  <h1>API-ключі</h1>
+  <p class="pu-muted">Ключі автентифікують REST API та MCP-сервер. Повноваження агента — рівно права його ключа.</p>
   ${list}
   <form class="pu-card" method="post" action="/dashboard/api-keys" style="margin-top:1.5rem">
     ${csrfField(d.csrf)}
-    <h2>Create a key</h2>
-    <label for="name">Name</label>
+    <h2>Створити ключ</h2>
+    <label for="name">Назва</label>
     <input id="name" name="name" required aria-required="true" maxlength="80"
-           placeholder="Laptop CLI"${describedBy('name', errors)}>
+           placeholder="Ноутбук CLI"${describedBy('name', errors)}>
     ${fieldError('name', errors)}
-    <label for="scopes">Scopes</label>
+    <label for="scopes">Права</label>
     <input id="scopes" name="scopes" value="read write"
            maxlength="200"${describedBy('scopes', errors)}>
-    <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Space-separated. Grant the fewest that work.</p>
+    <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Через пробіл. Давай мінімум, який працює.</p>
     ${fieldError('scopes', errors)}
-    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Create key</button></div>
+    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Створити ключ</button></div>
   </form>
 </section>` +
     shellBottom(d.brandName)
@@ -1007,7 +1015,7 @@ function apiKeyRow(d: ApiKeysPageData, k: ApiKey): string {
         <form method="post" action="/dashboard/api-keys/${encodeURIComponent(k.id)}/delete" style="margin:0">
           ${csrfField(d.csrf)}
           <button class="pu-btn pu-btn-danger" type="submit"
-                  style="padding:.4rem .8rem;font-size:.875rem">Revoke</button>
+                  style="padding:.4rem .8rem;font-size:.875rem">Відкликати</button>
         </form>
       </li>`
 }
@@ -1045,33 +1053,33 @@ export function settingsPage(d: SettingsPageData): string {
   const companyUrlValue = d.companyUrlValue ?? d.user.companyUrl ?? ''
 
   return (
-    shellTop(d, 'Settings', 'settings') +
+    shellTop(d, 'Профіль', 'settings') +
     (d.notice ? notice(d.notice) : '') +
     // One panel, one identity: the photo IS part of the profile, and the
     // split cards read as two unrelated features. Photo column left (the
     // file input is visually hidden — the styled label is the whole control,
     // and choosing a file submits immediately, so there is no separate
     // Upload step to explain), fields right.
-    `<section class="pu-card" aria-label="Your profile" style="margin-bottom:1.25rem">
-  <h1>Settings</h1>
-  <h2>Your profile</h2>
-  <p class="pu-muted">Shown on your booking page and in confirmation emails.</p>
+    `<section class="pu-card" aria-label="Твій профіль" style="margin-bottom:1.25rem">
+  <h1>Профіль</h1>
+  <h2>Твій профіль</h2>
+  <p class="pu-muted">Показується на сторінці бронювання і в листах-підтвердженнях.</p>
   <div class="pu-profile">
     <div class="pu-profile-photo">
       ${avatarHtml({ key: d.user.avatarKey, name: d.user.name || d.user.slug, size: 88 })}
       <form method="post" action="/dashboard/settings/avatar" enctype="multipart/form-data">
         ${csrfField(d.csrf)}
-        <label class="pu-btn pu-btn-ghost pu-file-btn">Upload photo
+        <label class="pu-btn pu-btn-ghost pu-file-btn">Завантажити фото
           <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp" class="pu-sr"
-                 aria-label="Choose a photo" onchange="this.form.submit()"${describedBy('avatar', errors)}>
+                 aria-label="Обери фото" onchange="this.form.submit()"${describedBy('avatar', errors)}>
         </label>
-        <noscript><button class="pu-btn" type="submit" style="margin-top:.5rem">Upload</button></noscript>
+        <noscript><button class="pu-btn" type="submit" style="margin-top:.5rem">Завантажити</button></noscript>
       </form>
       ${
         d.user.avatarKey
           ? `<form method="post" action="/dashboard/settings/avatar/delete">
         ${csrfField(d.csrf)}
-        <button class="pu-btn-plain" type="submit">Remove</button>
+        <button class="pu-btn-plain" type="submit">Прибрати</button>
       </form>`
           : ''
       }
@@ -1080,32 +1088,32 @@ export function settingsPage(d: SettingsPageData): string {
     </div>
     <form method="post" action="/dashboard/settings/profile" class="pu-profile-fields">
       ${csrfField(d.csrf)}
-      <label for="name">Name</label>
+      <label for="name">Назва</label>
       <input id="name" name="name" required aria-required="true" maxlength="120"
              value="${escapeHtml(nameValue)}"${describedBy('name', errors)}>
       ${fieldError('name', errors)}
-      <label for="job_title">Position</label>
-      <input id="job_title" name="job_title" maxlength="120" placeholder="Optional"
+      <label for="job_title">Посада</label>
+      <input id="job_title" name="job_title" maxlength="120" placeholder="Не обовʼязково"
              value="${escapeHtml(jobTitleValue)}"${describedBy('job_title', errors)}>
       ${fieldError('job_title', errors)}
-      <label for="company">Company</label>
-      <input id="company" name="company" maxlength="120" placeholder="Optional"
+      <label for="company">Компанія</label>
+      <input id="company" name="company" maxlength="120" placeholder="Не обовʼязково"
              value="${escapeHtml(companyValue)}"${describedBy('company', errors)}>
       ${fieldError('company', errors)}
-      <label for="company_url">Company link</label>
+      <label for="company_url">Посилання компанії</label>
       <input id="company_url" name="company_url" type="url" maxlength="200" placeholder="https://… (optional)"
              value="${escapeHtml(companyUrlValue)}"${describedBy('company_url', errors)}>
-      <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Wraps the company name on your booking page.</p>
+      <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Обгортає назву компанії на сторінці бронювання посиланням.</p>
       ${fieldError('company_url', errors)}
-      <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Save profile</button></div>
+      <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Зберегти профіль</button></div>
     </form>
   </div>
 </section>
-<section class="pu-card" aria-label="Account settings">
-  <h2>Your booking page slug</h2>
-  <p class="pu-muted">Every one of your event types is published at
-    <code>/${escapeHtml(d.user.slug)}/&lt;event&gt;</code>. Changing your slug moves the address of
-    <strong>every</strong> event type at once.</p>
+<section class="pu-card" aria-label="Налаштування акаунта">
+  <h2>Адреса твоєї сторінки</h2>
+  <p class="pu-muted">Кожна твоя подія публікується за адресою
+    <code>/${escapeHtml(d.user.slug)}/&lt;подія&gt;</code>. Зміна адреси переносить
+    <strong>усі</strong> події одночасно.</p>
   <div role="alert" class="pu-callout" style="margin:.75rem 0">
     <p style="margin:0">
       Any link or QR code you have already shared &mdash; in an email signature, on a website, on a printed
@@ -1116,14 +1124,14 @@ export function settingsPage(d: SettingsPageData): string {
   </div>
   <form method="post" action="/dashboard/settings">
     ${csrfField(d.csrf)}
-    <label for="slug">Slug</label>
+    <label for="slug">Адреса</label>
     <input id="slug" name="slug" required aria-required="true" maxlength="40" pattern="[a-z0-9\-]+"
            value="${escapeHtml(slugValue)}"${describedBy('slug', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
       Lowercase letters, numbers and hyphens only, 2&ndash;40 characters. It becomes the first part of
       every one of your booking links: /&lt;slug&gt;/&lt;event&gt;.</p>
     ${fieldError('slug', errors)}
-    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Save slug</button></div>
+    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Зберегти адресу</button></div>
   </form>
 </section>` +
     shellBottom(d.brandName)
@@ -1171,13 +1179,13 @@ export function bookingDetailPage(d: BookingDetailPageData): string {
     hour: 'numeric',
     minute: '2-digit',
   })
-  const title = d.eventType?.title ?? 'Your booking'
+  const title = d.eventType?.title ?? 'Твоє бронювання'
   const cancelled = d.booking.status !== 'confirmed'
   const tokenField = `<input type="hidden" name="token" value="${escapeHtml(d.token)}">`
 
   return (
     shellHead({ title: `${title} · ${d.brandName}`, brandName: d.brandName }) +
-    `<section class="pu-card" aria-label="Your booking">
+    `<section class="pu-card" aria-label="Твоє бронювання">
   <p><span class="pu-badge"${cancelled ? ' style="background:var(--pu-paper-dim);color:var(--pu-ink-500)"' : ''}>${escapeHtml(statusLabel(d.booking))}</span></p>
   <h1>${escapeHtml(title)}</h1>
   <p>with ${escapeHtml(d.host.name || d.host.slug)}</p>
@@ -1190,7 +1198,7 @@ export function bookingDetailPage(d: BookingDetailPageData): string {
 </section>` +
     (cancelled
       ? `<section class="pu-card" style="margin-top:1.5rem">
-  <p class="pu-muted">This booking is no longer active, so there is nothing left to change.</p>
+  <p class="pu-muted">Це бронювання вже неактивне — змінювати нічого.</p>
 </section>`
       : rescheduleSection(d, tokenField) + cancelSection(d, tokenField)) +
     shellFoot(d.brandName)
@@ -1200,20 +1208,20 @@ export function bookingDetailPage(d: BookingDetailPageData): string {
 function statusLabel(b: Booking): string {
   switch (b.status) {
     case 'cancelled':
-      return 'Cancelled'
+      return 'Скасовано'
     case 'rescheduled':
-      return 'Moved'
+      return 'Перенесено'
     default:
-      return 'Confirmed'
+      return 'Підтверджено'
   }
 }
 
 function rescheduleSection(d: BookingDetailPageData, tokenField: string): string {
   // Same as cancelSection: 'manage' authorises this too.
   if (d.purpose !== 'reschedule' && d.purpose !== 'manage') {
-    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Reschedule">
-  <h2>Need a different time?</h2>
-  <p class="pu-muted">Use the reschedule link in your confirmation email — this one only cancels.</p>
+    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Перенесення">
+  <h2>Потрібен інший час?</h2>
+  <p class="pu-muted">Скористайся посиланням на перенесення з листа-підтвердження — це лише скасовує.</p>
 </section>`
   }
 
@@ -1221,9 +1229,9 @@ function rescheduleSection(d: BookingDetailPageData, tokenField: string): string
     ? `/booking/${encodeURIComponent(d.booking.id)}?token=${encodeURIComponent(d.token)}`
     : null
   if (!path) {
-    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Reschedule">
-  <h2>Reschedule</h2>
-  <p class="pu-muted">This event type is no longer offered, so it cannot be rescheduled. Cancel and book again.</p>
+    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Перенесення">
+  <h2>Перенести</h2>
+  <p class="pu-muted">Цю подію більше не проводять, тож перенести не вийде. Скасуй і забронюй заново.</p>
 </section>`
   }
 
@@ -1235,15 +1243,15 @@ function rescheduleSection(d: BookingDetailPageData, tokenField: string): string
       hour: 'numeric',
       minute: '2-digit',
     })
-    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Confirm new time">
-  <h2>Move to this time?</h2>
+    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Підтвердження нового часу">
+  <h2>Перенести на цей час?</h2>
   <p class="pu-time"><strong>${escapeHtml(when)}</strong><br>
     <span class="pu-muted">${escapeHtml(d.booking.guestTimezone)}</span></p>
   <form method="post" action="/booking/${encodeURIComponent(d.booking.id)}/reschedule">
     ${tokenField}
     <input type="hidden" name="start" value="${d.newStart}">
     <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-      <button class="pu-btn" type="submit">Confirm new time</button>
+      <button class="pu-btn" type="submit">Підтвердити новий час</button>
       <a class="pu-btn pu-btn-ghost" href="${escapeHtml(path)}">Back</a>
     </div>
   </form>
@@ -1254,7 +1262,7 @@ function rescheduleSection(d: BookingDetailPageData, tokenField: string): string
   const slots = d.slots ?? []
   const list =
     slots.length === 0
-      ? '<p class="pu-muted">No times available on this day.</p>'
+      ? '<p class="pu-muted">На цей день вільних слотів немає.</p>'
       : `<div class="pu-slots">
     ${slots
       .map((s) => {
@@ -1266,13 +1274,13 @@ function rescheduleSection(d: BookingDetailPageData, tokenField: string): string
       .join('\n    ')}
   </div>`
 
-  return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Reschedule">
-  <h2>Pick a new time</h2>
+  return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Перенесення">
+  <h2>Обери новий час</h2>
   <form method="get" action="/booking/${encodeURIComponent(d.booking.id)}">
     <input type="hidden" name="token" value="${escapeHtml(d.token)}">
-    <label for="date">Day</label>
+    <label for="date">День</label>
     <input id="date" name="date" type="date" value="${escapeHtml(date)}">
-    <div style="margin-top:.75rem"><button class="pu-btn pu-btn-ghost" type="submit">Show times</button></div>
+    <div style="margin-top:.75rem"><button class="pu-btn pu-btn-ghost" type="submit">Показати час</button></div>
   </form>
   <p class="pu-muted" style="font-size:.8125rem;margin-top:1rem">
     Times in ${escapeHtml(d.booking.guestTimezone)}</p>
@@ -1286,17 +1294,17 @@ function cancelSection(d: BookingDetailPageData, tokenField: string): string {
   // every real guest looking at "use the cancel link in your email" — while
   // that email's cancel link is this same URL. The loop never terminated.
   if (d.purpose !== 'cancel' && d.purpose !== 'manage') {
-    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Cancel">
-  <h2>Need to cancel?</h2>
-  <p class="pu-muted">Use the cancel link in your confirmation email — this one only reschedules.</p>
+    return `<section class="pu-card" style="margin-top:1.5rem" aria-label="Скасування">
+  <h2>Потрібно скасувати?</h2>
+  <p class="pu-muted">Скористайся посиланням на скасування з листа-підтвердження — це лише переносить.</p>
 </section>`
   }
   return `<form class="pu-card" method="post" style="margin-top:1.5rem"
       action="/booking/${encodeURIComponent(d.booking.id)}/cancel">
   ${tokenField}
-  <h2>Cancel this booking</h2>
-  <p class="pu-muted">The host is notified and the time is released for someone else.</p>
-  <button class="pu-btn pu-btn-danger" type="submit">Cancel booking</button>
+  <h2>Скасувати бронювання</h2>
+  <p class="pu-muted">Ми повідомимо організатора, а час звільнимо для інших.</p>
+  <button class="pu-btn pu-btn-danger" type="submit">Скасувати бронювання</button>
 </form>`
 }
 
@@ -1305,10 +1313,10 @@ export function manageLinkErrorPage(brandName: string, message: string): string 
   return (
     shellHead({ title: `Link not valid · ${brandName}`, brandName }) +
     `<section class="pu-card">
-  <h1>This link is not valid</h1>
+  <h1>Посилання недійсне</h1>
   <p class="pu-muted">${escapeHtml(message)}</p>
-  <p class="pu-muted">Links expire, and rescheduling replaces the ones sent before it. The most recent
-     confirmation email always has a working link.</p>
+  <p class="pu-muted">Посилання мають строк дії, а перенесення скасовує всі попередні. У найсвіжішому
+     листі-підтвердженні посилання завжди робоче.</p>
 </section>` +
     shellFoot(brandName)
   )
@@ -1493,18 +1501,18 @@ export function adminPage(d: AdminPageData): string {
       // The last admin gets no demote button at all — the server enforces it
       // too, but offering a button that can only fail is UI lying.
       const action = lastAdmin
-        ? '<span class="pu-muted">Last admin</span>'
+        ? '<span class="pu-muted">Останній адмін</span>'
         : `<form method="post" action="/dashboard/admin/users/${encodeURIComponent(u.id)}/role" style="margin:0">
             ${csrfField(d.csrf)}
             <input type="hidden" name="role" value="${u.role === 'admin' ? 'member' : 'admin'}">
             <button class="pu-btn pu-btn-ghost" type="submit" style="padding:.3rem .6rem;font-size:.8125rem">
-              ${u.role === 'admin' ? 'Remove admin' : 'Make admin'}</button>
+              ${u.role === 'admin' ? 'Зняти адміна' : 'Зробити адміном'}</button>
           </form>`
       return `<tr>
         <td>${escapeHtml(u.name || u.slug)}${isSelf ? ' <span class="pu-muted">(you)</span>' : ''}<br>
           <span class="pu-muted" style="font-size:.8125rem">${escapeHtml(u.email)}</span></td>
         <td class="pu-time">/${escapeHtml(u.slug)}</td>
-        <td>${u.role === 'admin' ? '<span class="pu-badge">Admin</span>' : '<span class="pu-muted">Member</span>'}</td>
+        <td>${u.role === 'admin' ? '<span class="pu-badge">Адмін</span>' : '<span class="pu-muted">Учасник</span>'}</td>
         <td>${action}</td>
       </tr>`
     })
@@ -1517,37 +1525,37 @@ export function adminPage(d: AdminPageData): string {
     ${csrfField(d.csrf)}
     <label style="display:flex;align-items:baseline;gap:.5rem;font-weight:400;margin:.5rem 0 0">
       <input type="radio" name="mode" value="open"${parsedMode === 'open' ? ' checked' : ''} style="width:auto">
-      <span><strong>Open</strong> — anyone who reaches the sign-in page can create an account</span>
+      <span><strong>Відкрита</strong> — будь-хто, хто дійшов до сторінки входу, може створити акаунт</span>
     </label>
     <label style="display:flex;align-items:baseline;gap:.5rem;font-weight:400;margin:.5rem 0 0">
       <input type="radio" name="mode" value="closed"${parsedMode === 'closed' ? ' checked' : ''} style="width:auto">
-      <span><strong>Closed</strong> — existing users only; nobody new can register</span>
+      <span><strong>Закрита</strong> — лише наявні користувачі; нових не буде</span>
     </label>
     <label style="display:flex;align-items:baseline;gap:.5rem;font-weight:400;margin:.5rem 0 0">
       <input type="radio" name="mode" value="allowlist"${parsedMode === 'allowlist' ? ' checked' : ''} style="width:auto">
-      <span><strong>Allowlist</strong> — only these emails and <code>@domains</code>:</span>
+      <span><strong>Список</strong> — лише ці адреси та <code>@домени</code>:</span>
     </label>
     <input name="allowlist" value="${escapeHtml(allowlistValue)}" placeholder="jo@acme.com, @acme.com"
            style="margin-top:.5rem"${describedBy('allowlist', errors)}>
     ${fieldError('allowlist', errors)}
-    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Save sign-up policy</button></div>
+    <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Зберегти політику реєстрації</button></div>
   </form>`
 
   return (
-    shellTop(d, 'Admin', 'admin') +
+    shellTop(d, 'Адмін', 'admin') +
     (d.notice ? notice(d.notice) : '') +
-    `<section class="pu-card" aria-label="Sign-ups" style="margin-bottom:1.25rem">
-  <h1>Admin</h1>
-  <h2>Sign-ups</h2>
-  <p class="pu-muted">Who may create an account on this instance. Existing users always sign in.</p>
+    `<section class="pu-card" aria-label="Реєстрація" style="margin-bottom:1.25rem">
+  <h1>Адмін</h1>
+  <h2>Реєстрація</h2>
+  <p class="pu-muted">Хто може створити акаунт на цьому сервері. Наявні користувачі входять завжди.</p>
   ${signupsBody}
 </section>
-<section class="pu-card" aria-label="Users">
-  <h2>Users</h2>
+<section class="pu-card" aria-label="Користувачі">
+  <h2>Користувачі</h2>
   ${fieldError('role', errors)}
   <div class="pu-docs-table-wrap"><table style="width:100%">
-    <thead><tr><th scope="col" style="text-align:left">User</th><th scope="col" style="text-align:left">Booking page</th>
-      <th scope="col" style="text-align:left">Role</th><th scope="col" style="text-align:left"></th></tr></thead>
+    <thead><tr><th scope="col" style="text-align:left">Користувач</th><th scope="col" style="text-align:left">Сторінка</th>
+      <th scope="col" style="text-align:left">Роль</th><th scope="col" style="text-align:left"></th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>
 </section>` +

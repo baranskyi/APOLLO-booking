@@ -132,14 +132,14 @@ describe('eventHeader host identity', () => {
 describe('shellFoot operator line', () => {
   it('anchors the footer with the operator and keeps the wordmark as attribution', () => {
     const html = shellFoot('Punctual', true, false, 'Acme Inc')
-    expect(html).toContain('Acme Inc · scheduling by')
-    expect(html).toContain('punctual<span>:</span>')
-    expect(html).not.toContain('scheduling that shows up on time')
+    expect(html).toContain('Acme Inc · бронювання')
+    expect(html).toContain('class="pu-mark"')
   })
 
-  it('keeps the product tagline when there is no operator', () => {
+  it('shows the wordmark alone when there is no operator', () => {
     const html = shellFoot('Punctual', true, false, null)
-    expect(html).toContain('punctual<span>:</span></a> — scheduling that shows up on time')
+    expect(html).toContain('class="pu-mark"')
+    expect(html).not.toContain('·')
   })
 
   it('escapes an attacker-controlled operator', () => {

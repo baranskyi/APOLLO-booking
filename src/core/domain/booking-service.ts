@@ -254,7 +254,7 @@ export function combineBusy(
  */
 export const AGENDA_QUESTION: EventTypeQuestion = {
   id: 'agenda',
-  label: 'What would you like to discuss?',
+  label: 'Що хочеш обговорити?',
   type: 'textarea',
   required: false,
 }
@@ -307,13 +307,13 @@ export function validateAnswers(
   for (const q of effectiveQuestions(et)) {
     const v = (answers[q.id] ?? '').trim()
     if (q.required && v === '') {
-      errors[q.id] = 'This field is required'
+      errors[q.id] = 'Обовʼязкове поле'
       continue
     }
     if (v !== '' && q.type === 'select' && q.options && !q.options.includes(v)) {
-      errors[q.id] = 'Not one of the available options'
+      errors[q.id] = 'Обери значення зі списку'
     }
-    if (v.length > 2000) errors[q.id] = 'Too long (max 2000 characters)'
+    if (v.length > 2000) errors[q.id] = 'Задовго — до 2000 символів'
   }
   return errors
 }

@@ -201,7 +201,7 @@ describe('session gate', () => {
     const res = await get('/dashboard', cookie)
     expect(res.status).toBe(200)
     const html = await res.text()
-    expect(html).toContain('Event types')
+    expect(html).toContain('Події')
     expect(html).toContain('Intro call')
   })
 
@@ -266,7 +266,7 @@ describe('CSRF', () => {
     // The raw key is shown exactly once, at creation (ADR-0005 §7).
     const html = await res.text()
     expect(html).toContain('pk_')
-    expect(html).toContain('only time it will be shown')
+    expect(html).toContain('Показуємо його лише раз')
   })
 })
 
@@ -296,7 +296,7 @@ describe('guest manage page', () => {
     expect(res.status).toBe(200)
     const html = await res.text()
     expect(html).toContain('Intro call')
-    expect(html).toContain('Cancel this booking')
+    expect(html).toContain('Скасувати бронювання')
   })
 
   it('refuses a token with a tampered signature', async () => {
@@ -308,7 +308,7 @@ describe('guest manage page', () => {
 
     const res = await get(`/booking/${BOOKING_ID}?token=${encodeURIComponent(forged)}`)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('This link is not valid')
+    expect(await res.text()).toContain('Посилання недійсне')
   })
 
   it('refuses a missing token', async () => {
@@ -516,7 +516,7 @@ describe('settings — change slug', () => {
 
     const res = await post('/dashboard/settings', { slug: 'sluggy-new', csrf }, cookie)
     expect(res.status).toBe(200)
-    expect(await res.text()).toContain('Slug updated')
+    expect(await res.text()).toContain('Адресу змінено')
 
     const row = await db
       .prepare('SELECT slug FROM users WHERE id = ?')
@@ -532,7 +532,7 @@ describe('settings — change slug', () => {
 
     const res = await post('/dashboard/settings', { slug: TAKEN_SLUG, csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('already taken')
+    expect(await res.text()).toContain('вже зайнято')
 
     const row = await db
       .prepare('SELECT slug FROM users WHERE id = ?')
@@ -552,7 +552,7 @@ describe('settings — change slug', () => {
 
     const res = await post('/dashboard/settings', { slug: TAKEN_TEAM_SLUG, csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('already taken')
+    expect(await res.text()).toContain('вже зайнято')
 
     const row = await db
       .prepare('SELECT slug FROM users WHERE id = ?')
@@ -669,7 +669,7 @@ describe('settings — profile (name and company)', () => {
       cookie,
     )
     expect(res.status).toBe(200)
-    expect(await res.text()).toContain('Profile updated')
+    expect(await res.text()).toContain('Профіль оновлено')
 
     const row = await db
       .prepare('SELECT name, job_title, company FROM users WHERE id = ?')
@@ -720,7 +720,7 @@ describe('settings — profile (name and company)', () => {
       cookie,
     )
     expect(bad.status).toBe(400)
-    expect(await bad.text()).toContain('starting with https://')
+    expect(await bad.text()).toContain('починається з https://')
   })
 
   it('rejects an empty name, leaving the row unchanged', async () => {
@@ -730,7 +730,7 @@ describe('settings — profile (name and company)', () => {
 
     const res = await post('/dashboard/settings/profile', { name: '  ', company: '', csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('Name is required')
+    expect(await res.text()).toContain('Вкажи імʼя')
 
     const row = await db
       .prepare('SELECT name FROM users WHERE id = ?')
@@ -908,7 +908,7 @@ describe('admin — instance administration', () => {
     const csrf = await adminCsrf(cookie)
     const res = await post('/dashboard/admin/signups', { mode: 'allowlist', allowlist: ' , ', csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('at least one email or @domain')
+    expect(await res.text()).toContain('хоча б одну адресу або @домен')
   })
 
   it('promotes a member, and refuses to demote the last admin', async () => {
@@ -918,7 +918,7 @@ describe('admin — instance administration', () => {
     // The only admin demoting themselves must be refused outright.
     const refused = await post(`/dashboard/admin/users/${ADMIN_ID}/role`, { role: 'member', csrf }, cookie)
     expect(refused.status).toBe(400)
-    expect(await refused.text()).toContain('Cannot remove the last admin')
+    expect(await refused.text()).toContain('Не можна зняти останнього адміна')
 
     csrf = await adminCsrf(cookie)
     const promoted = await post(`/dashboard/admin/users/${HOST_ID}/role`, { role: 'admin', csrf }, cookie)

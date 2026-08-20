@@ -112,7 +112,7 @@ describe('agenda answers through the pipeline', () => {
     const html = confirmForm(d, Date.UTC(2026, 8, 10, 9, 0))
     expect(html).toContain('name="q_agenda"')
     expect(html).toContain(AGENDA_QUESTION.label)
-    expect(html).toContain('(optional)')
+    expect(html).toContain('(не обовʼязково)')
   })
 
   it('the host confirmation email shows the agenda answer', () => {

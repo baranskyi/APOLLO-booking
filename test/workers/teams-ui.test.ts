@@ -219,7 +219,7 @@ describe('teams page', () => {
 
     const res = await post('/dashboard/teams', { name: 'Shadow', slug: 'bob', csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('already taken')
+    expect(await res.text()).toContain('вже зайнято')
 
     const row = await db.prepare('SELECT id FROM teams WHERE slug = ?').bind('bob').first()
     expect(row).toBeNull()
@@ -231,7 +231,7 @@ describe('teams page', () => {
 
     const res = await post('/dashboard/teams', { name: 'Support Crew Again', slug: 'support-crew', csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('already taken')
+    expect(await res.text()).toContain('вже зайнято')
 
     const rows = await db
       .prepare('SELECT COUNT(*) AS n FROM teams WHERE slug = ?')
@@ -282,7 +282,7 @@ describe('team members', () => {
       cookie,
     )
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('No user with that email on this instance')
+    expect(await res.text()).toContain('Користувача з такою адресою тут немає')
   })
 
   it('a non-member cannot manage someone else\'s team', async () => {
@@ -314,7 +314,7 @@ describe('team members', () => {
 
     const res = await post(`/dashboard/teams/${teamId}/members/${BOB_ID}/remove`, { csrf }, cookie)
     expect(res.status).toBe(200)
-    expect(await res.text()).toContain('Member removed')
+    expect(await res.text()).toContain('Учасника прибрано')
 
     const row = await db
       .prepare('SELECT user_id FROM team_members WHERE team_id = ? AND user_id = ?')
@@ -402,7 +402,7 @@ describe('team event types', () => {
       cookie,
     )
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('not a member of that team')
+    expect(await res.text()).toContain('не учасник цієї команди')
 
     const row = await db.prepare('SELECT id FROM event_types WHERE slug = ?').bind('hijack').first()
     expect(row).toBeNull()
