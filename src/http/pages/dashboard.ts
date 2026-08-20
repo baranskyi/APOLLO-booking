@@ -275,7 +275,7 @@ export function dashboardHome(d: DashboardHomeData): string {
   </section>
   <section class="pu-card" aria-label="Найближчі бронювання">
     <h2>Найближчі</h2>
-    <p class="pu-muted" style="font-size:.8125rem">Times in ${escapeHtml(d.user.tz)} (${escapeHtml(offsetLabel(Date.now(), d.user.tz))})</p>
+    <p class="pu-muted" style="font-size:.8125rem">Час у зоні ${escapeHtml(d.user.tz)} (${escapeHtml(offsetLabel(Date.now(), d.user.tz))})</p>
     ${upcoming}
   </section>
 </div>` +
@@ -311,7 +311,7 @@ function eventTypeCard(d: DashboardHomeData, item: EventTypeListItem): string {
     </div>
   </div>
   <ul class="pu-meta">
-    <li><span class="pu-dot"></span> ${et.durationMinutes} min</li>
+    <li><span class="pu-dot"></span> ${et.durationMinutes} хв</li>
     <li>${escapeHtml(schedulingLabel(et))}</li>
     <li>${escapeHtml(locationLabel(et))}</li>
   </ul>
@@ -322,7 +322,7 @@ function eventTypeCard(d: DashboardHomeData, item: EventTypeListItem): string {
   </div>
   <div style="margin-top:.75rem;display:flex;gap:.75rem;flex-wrap:wrap">
     <a class="pu-btn pu-btn-ghost" href="/dashboard/event-types/${encodeURIComponent(et.id)}">Редагувати</a>
-    <a class="pu-btn pu-btn-ghost" href="${escapeHtml(url)}">Preview</a>
+    <a class="pu-btn pu-btn-ghost" href="${escapeHtml(url)}">Переглянути</a>
   </div>
 </article>`
 }
@@ -425,7 +425,7 @@ export function eventTypeForm(d: EventTypeFormData): string {
     <input id="slug" name="slug" required aria-required="true" maxlength="60" pattern="[a-z0-9\-]+"
            value="${escapeHtml(et?.slug ?? '')}"${describedBy('slug', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      Lowercase letters, numbers and hyphens. It becomes /${escapeHtml(d.user.slug)}/&lt;slug&gt;.</p>
+      Малі латинські літери, цифри та дефіси. Стане /${escapeHtml(d.user.slug)}/&lt;адреса&gt;.</p>
     ${fieldError('slug', errors)}
 
     ${ownershipFields(d, teams, errors)}
@@ -439,7 +439,7 @@ export function eventTypeForm(d: EventTypeFormData): string {
         <label for="durationMinutes">Тривалість (хвилин)</label>
         <input id="durationMinutes" name="durationMinutes" type="number" min="5" max="1440" step="5"
                required aria-required="true" value="${escapeHtml(num(et?.durationMinutes, '30'))}"${describedBy('durationMinutes', errors)}>
-        <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">A multiple of 5 — the booking grid is 5-minute buckets.</p>
+        <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Кратно 5 — сітка бронювання йде по 5 хвилин.</p>
         ${fieldError('durationMinutes', errors)}
       </div>
       <div>
@@ -495,14 +495,14 @@ export function eventTypeForm(d: EventTypeFormData): string {
     <input id="locationValue" name="locationValue" maxlength="500"
            value="${escapeHtml(et?.locationValue ?? '')}"${describedBy('locationValue', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      The meeting URL, phone number or address. Ignored for Google Meet, which mints its own link.</p>
+      Посилання на зустріч, номер телефону або адреса. Для Google Meet не потрібно — він створює лінк сам.</p>
     ${fieldError('locationValue', errors)}
 
     <label for="questions">Власні питання</label>
     <textarea id="questions" name="questions" rows="5"${describedBy('questions', errors)}>${escapeHtml(d.questionsText ?? formatQuestions(et?.questions ?? []))}</textarea>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      One per line: <code>Label | text|textarea|select | required|optional | option, option</code>.
-      Name and email are always asked and are not listed here.</p>
+      По рядку на питання: <code>Підпис | text|textarea|select | required|optional | варіант, варіант</code>.
+      Імʼя та email питаємо завжди — їх тут вказувати не треба.</p>
     ${fieldError('questions', errors)}
 
     <label for="active" style="display:flex;align-items:center;gap:.5rem;margin-top:1rem">
@@ -569,7 +569,7 @@ function ownershipFields(d: EventTypeFormData, teams: Team[], errors: Record<str
       <option value="collective"${et?.schedulingType === 'collective' ? ' selected' : ''}>Разом — присутні всі учасники</option>
     </select>
         <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-          Applies when a team owns the event. Ignored for a personal one.</p>
+          Діє, коли подією володіє команда. Для особистої не застосовується.</p>
         ${fieldError('schedulingType', errors)}
       </div>
     </div>`
@@ -659,20 +659,20 @@ export function availabilityPage(d: AvailabilityPageData): string {
       ${zones.map((z) => `<option value="${escapeHtml(z)}"></option>`).join('\n      ')}
     </datalist>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      Your weekly hours below are read in this zone, so they follow you through daylight saving.</p>
+      Робочі години нижче читаються в цьому поясі, тож вони переводяться разом із літнім часом.</p>
     ${fieldError('timezone', errors)}
 
     <h2 style="margin-top:1.5rem">Робочі години</h2>
     <p class="pu-muted" style="font-size:.8125rem">
-      Comma-separated 24-hour ranges, for example <code>09:00-12:00, 13:00-17:00</code>. Leave a day blank for a day off.</p>
+      Діапазони у 24-годинному форматі через кому, наприклад <code>09:00-12:00, 13:00-17:00</code>. Порожній рядок — вихідний.</p>
     ${rows}
 
     <h2 style="margin-top:1.5rem">Винятки за датами</h2>
     <label for="overrides">Конкретні дати</label>
     <textarea id="overrides" name="overrides" rows="5" placeholder="2026-12-24"${describedBy('overrides', errors)}>${escapeHtml(formatOverrides(d.availability.overrides))}</textarea>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      One per line: <code>YYYY-MM-DD 10:00-14:00</code>. A date with no ranges is a day off, and an override
-      replaces that day's weekly hours entirely.</p>
+      По рядку на дату: <code>YYYY-MM-DD 10:00-14:00</code>. Дата без діапазонів — вихідний, а виняток
+      повністю замінює робочі години того дня.</p>
     ${fieldError('overrides', errors)}
 
     <div style="margin-top:1.5rem"><button class="pu-btn" type="submit">Зберегти розклад</button></div>
@@ -737,8 +737,8 @@ export function teamsPage(d: TeamsPageData): string {
     <input id="team-slug" name="slug" required aria-required="true" maxlength="40" pattern="[a-z0-9\-]+"
            value="${escapeHtml(d.slugValue ?? '')}"${describedBy('team-slug', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      Lowercase letters, numbers and hyphens, 2&ndash;40 characters. It becomes the first part of the
-      team's booking links: /&lt;slug&gt;/&lt;event&gt;. You join as the first member.</p>
+      Малі латинські літери, цифри та дефіси, 2&ndash;40 символів. Це перша частина посилань команди:
+      /&lt;адреса&gt;/&lt;подія&gt;. Ти станеш її першим учасником.</p>
     ${fieldError('team-slug', errors)}
     <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Створити команду</button></div>
   </form>
@@ -804,8 +804,8 @@ function teamCard(d: TeamsPageData, view: TeamView): string {
       </div>
     </div>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      Anyone with an account on this instance. A higher weight takes a proportionally larger share of
-      round-robin bookings. Adding someone already on the team updates their weight.</p>
+      Будь-хто з акаунтом на цьому сервері. Більша вага — пропорційно більша частка почергових бронювань.
+      Якщо додати того, хто вже в команді, оновиться його вага.</p>
     <div style="margin-top:.75rem"><button class="pu-btn" type="submit">Додати учасника</button></div>
   </form>
 </article>`
@@ -859,8 +859,8 @@ export function connectionsPage(d: ConnectionsPageData): string {
   <div class="pu-card" style="margin-top:1.5rem">
     <h2>Підключити ще календар</h2>
     <p class="pu-muted" style="font-size:.8125rem">
-      Connecting asks for calendar permissions. Signing in never does — they are separate grants, so revoking
-      one does not affect the other.</p>
+      Підключення запитує доступ до календаря. Вхід — ніколи: це окремі дозволи, тож відкликання одного
+      не впливає на інший.</p>
     ${connectButtons}
   </div>
 </section>` +
@@ -934,7 +934,7 @@ function connectionCard(d: ConnectionsPageData, view: ConnectionView): string {
 function syncBadge(c: CalendarConnection): string {
   if (c.syncStatus === 'ok') return '<span class="pu-badge">Підключено</span>'
   const label = c.syncStatus === 'needs_reconnect' ? 'Потрібне перепідключення' : 'Помилка синхронізації'
-  return `<span class="pu-badge" style="background:var(--pu-paper-dim);color:var(--pu-danger)">${label}</span>`
+  return `<span class="pu-badge" style="background:var(--pu-paper-dim);color:var(--pu-danger-text)">${label}</span>`
 }
 
 // ---------------------------------------------------------------------------
@@ -966,7 +966,7 @@ export function apiKeysPage(d: ApiKeysPageData): string {
     shellTop(d, 'API-ключі', 'keys') +
     (d.newKey
       ? `<section class="pu-card" role="alert" aria-label="Твій новий API-ключ"
-    style="border-color:var(--pu-green-700);margin-bottom:1.5rem">
+    style="border-color:var(--pu-green-fill);margin-bottom:1.5rem">
   <h2>Скопіюй ключ зараз</h2>
   <p><strong>Показуємо його лише раз.</strong> Ми зберігаємо тільки хеш, тож якщо загубиш —
      доведеться створити новий.</p>
@@ -1069,7 +1069,7 @@ export function settingsPage(d: SettingsPageData): string {
       ${avatarHtml({ key: d.user.avatarKey, name: d.user.name || d.user.slug, size: 88 })}
       <form method="post" action="/dashboard/settings/avatar" enctype="multipart/form-data">
         ${csrfField(d.csrf)}
-        <label class="pu-btn pu-btn-ghost pu-file-btn">Завантажити фото
+        <label class="pu-btn pu-btn-ghost pu-file-btn">Завантажити
           <input type="file" name="avatar" accept="image/png,image/jpeg,image/webp" class="pu-sr"
                  aria-label="Обери фото" onchange="this.form.submit()"${describedBy('avatar', errors)}>
         </label>
@@ -1083,7 +1083,7 @@ export function settingsPage(d: SettingsPageData): string {
       </form>`
           : ''
       }
-      <p class="pu-muted" style="font-size:.75rem;margin:0;text-align:center">PNG, JPEG or WebP,<br>up to 5&nbsp;MB</p>
+      <p class="pu-muted" style="font-size:.75rem;margin:0;text-align:center">PNG, JPEG або WebP,<br>до 5&nbsp;МБ</p>
       ${fieldError('avatar', errors)}
     </div>
     <form method="post" action="/dashboard/settings/profile" class="pu-profile-fields">
@@ -1101,7 +1101,7 @@ export function settingsPage(d: SettingsPageData): string {
              value="${escapeHtml(companyValue)}"${describedBy('company', errors)}>
       ${fieldError('company', errors)}
       <label for="company_url">Посилання компанії</label>
-      <input id="company_url" name="company_url" type="url" maxlength="200" placeholder="https://… (optional)"
+      <input id="company_url" name="company_url" type="url" maxlength="200" placeholder="https://… (не обовʼязково)"
              value="${escapeHtml(companyUrlValue)}"${describedBy('company_url', errors)}>
       <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">Обгортає назву компанії на сторінці бронювання посиланням.</p>
       ${fieldError('company_url', errors)}
@@ -1116,11 +1116,10 @@ export function settingsPage(d: SettingsPageData): string {
     <strong>усі</strong> події одночасно.</p>
   <div role="alert" class="pu-callout" style="margin:.75rem 0">
     <p style="margin:0">
-      Any link or QR code you have already shared &mdash; in an email signature, on a website, on a printed
-      flyer &mdash; will stop working the moment you save. There is no redirect from
-      <code>${escapeHtml(d.user.slug)}</code> to the new slug: a guest who kept the old link lands on a
-      &ldquo;not found&rdquo; page. Update every place you have posted your link, before or right after you
-      change it.</p>
+      Будь-яке посилання чи QR-код, який ти вже поширив &mdash; у підписі листа, на сайті, на друкованій
+      листівці &mdash; перестане працювати щойно збережеш. Перенаправлення зі старої адреси
+      <code>${escapeHtml(d.user.slug)}</code> немає: гість зі старим посиланням побачить сторінку
+      &laquo;не знайдено&raquo;. Онови всі місця, де публікував посилання, до або одразу після зміни.</p>
   </div>
   <form method="post" action="/dashboard/settings">
     ${csrfField(d.csrf)}
@@ -1128,8 +1127,8 @@ export function settingsPage(d: SettingsPageData): string {
     <input id="slug" name="slug" required aria-required="true" maxlength="40" pattern="[a-z0-9\-]+"
            value="${escapeHtml(slugValue)}"${describedBy('slug', errors)}>
     <p class="pu-muted" style="font-size:.8125rem;margin:.25rem 0 0">
-      Lowercase letters, numbers and hyphens only, 2&ndash;40 characters. It becomes the first part of
-      every one of your booking links: /&lt;slug&gt;/&lt;event&gt;.</p>
+      Лише малі латинські літери, цифри та дефіси, 2&ndash;40 символів. Це перша частина всіх твоїх
+      посилань: /&lt;адреса&gt;/&lt;подія&gt;.</p>
     ${fieldError('slug', errors)}
     <div style="margin-top:1.25rem"><button class="pu-btn" type="submit">Зберегти адресу</button></div>
   </form>
@@ -1188,11 +1187,11 @@ export function bookingDetailPage(d: BookingDetailPageData): string {
     `<section class="pu-card" aria-label="Твоє бронювання">
   <p><span class="pu-badge"${cancelled ? ' style="background:var(--pu-paper-dim);color:var(--pu-ink-500)"' : ''}>${escapeHtml(statusLabel(d.booking))}</span></p>
   <h1>${escapeHtml(title)}</h1>
-  <p>with ${escapeHtml(d.host.name || d.host.slug)}</p>
+  <p>· ${escapeHtml(d.host.name || d.host.slug)}</p>
   <p class="pu-time"><strong>${escapeHtml(when)}</strong><br>
     <span class="pu-muted">${escapeHtml(tz)} (${escapeHtml(offsetLabel(d.booking.startUtc, tz))}) · ${
       Math.round((d.booking.endUtc - d.booking.startUtc) / 60000)
-    } min</span></p>
+    } хв</span></p>
   ${d.eventType ? `<p class="pu-muted">${escapeHtml(locationLabel(d.eventType))}</p>` : ''}
   ${d.error ? `<p class="pu-err" role="alert">${escapeHtml(d.error)}</p>` : ''}
 </section>` +
@@ -1283,7 +1282,7 @@ function rescheduleSection(d: BookingDetailPageData, tokenField: string): string
     <div style="margin-top:.75rem"><button class="pu-btn pu-btn-ghost" type="submit">Показати час</button></div>
   </form>
   <p class="pu-muted" style="font-size:.8125rem;margin-top:1rem">
-    Times in ${escapeHtml(d.booking.guestTimezone)}</p>
+    Час у зоні ${escapeHtml(d.booking.guestTimezone)}</p>
   ${list}
 </section>`
 }

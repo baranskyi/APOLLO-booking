@@ -148,7 +148,7 @@ export async function requestMagicLink(
   const link = `${trimTrailingSlash(deps.config.baseUrl)}/auth/callback?token=${encodeURIComponent(token)}`
   await deps.email.send({
     to: email,
-    subject: `Sign in to ${deps.config.brandName}`,
+    subject: `Вхід до ${deps.config.brandName}`,
     text: magicLinkText(deps.config, link, req),
     html: magicLinkHtml(deps.config, link, req),
   })
@@ -552,25 +552,25 @@ async function uniqueSlug(deps: SessionDeps, email: string): Promise<string> {
  */
 function magicLinkText(config: EngineConfig, link: string, req: MagicLinkRequest): string {
   return [
-    `Sign in to ${config.brandName}:`,
+    `Вхід до ${config.brandName}:`,
     '',
     link,
     '',
-    'This link works once and expires in 15 minutes.',
+    'Лінк одноразовий і діє 15 хвилин.',
     '',
-    `Requested from ${req.ip || 'an unknown address'} using ${req.userAgent || 'an unknown browser'}.`,
-    `If that was not you, ignore this email — nothing has changed. Questions: ${config.supportEmail}`,
+    `Запит з ${req.ip || 'невідомої адреси'}, ${req.userAgent || 'невідомий браузер'}.`,
+    `Якщо це не ти — просто проігноруй лист, нічого не змінилося. Питання: ${config.supportEmail}`,
   ].join('\n')
 }
 
 function magicLinkHtml(config: EngineConfig, link: string, req: MagicLinkRequest): string {
   return [
-    `<p>Sign in to ${escapeHtml(config.brandName)}:</p>`,
-    `<p><a href="${escapeHtml(link)}">Sign in</a></p>`,
-    '<p>This link works once and expires in 15 minutes.</p>',
-    `<p>Requested from ${escapeHtml(req.ip || 'an unknown address')} using ${escapeHtml(req.userAgent || 'an unknown browser')}.`,
-    ` If that was not you, ignore this email — nothing has changed.</p>`,
-    `<p>Questions: ${escapeHtml(config.supportEmail)}</p>`,
+    `<p>Вхід до ${escapeHtml(config.brandName)}:</p>`,
+    `<p><a href="${escapeHtml(link)}">Увійти</a></p>`,
+    '<p>Лінк одноразовий і діє 15 хвилин.</p>',
+    `<p>Запит з ${escapeHtml(req.ip || 'невідомої адреси')}, ${escapeHtml(req.userAgent || 'невідомий браузер')}.`,
+    ` Якщо це не ти — просто проігноруй лист, нічого не змінилося.</p>`,
+    `<p>Питання: ${escapeHtml(config.supportEmail)}</p>`,
   ].join('')
 }
 

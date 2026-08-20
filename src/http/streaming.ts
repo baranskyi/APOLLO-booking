@@ -44,8 +44,8 @@ export function streamPage(
         console.error('[punctual] streamed body failed', err)
         controller.enqueue(
           encoder.encode(
-            '<section class="pu-card"><h1>Something went wrong</h1>' +
-              '<p class="pu-muted">Please reload the page.</p></section>',
+            '<section class="pu-card"><h1>Щось пішло не так</h1>' +
+              '<p class="pu-muted">Онови сторінку.</p></section>',
           ),
         )
       }

@@ -48,7 +48,7 @@ export function validateSlug(raw: string): SlugValidation {
   const slug = raw.trim().toLowerCase()
 
   if (slug.length < 2) {
-    return { ok: false, reason: 'too_short', message: 'Must be at least 2 characters' }
+    return { ok: false, reason: 'too_short', message: 'Щонайменше 2 символи' }
   }
   if (slug.length > 40) {
     return { ok: false, reason: 'too_long', message: 'Must be 40 characters or fewer' }
@@ -57,16 +57,16 @@ export function validateSlug(raw: string): SlugValidation {
     return {
       ok: false,
       reason: 'invalid_characters',
-      message: 'Use lowercase letters, numbers and hyphens (not at the start or end)',
+      message: 'Лише малі латинські літери, цифри та дефіси (не на початку й не в кінці)',
     }
   }
   // A slug containing a dot would collide with static-asset routing and, worse,
   // could be mistaken for a filename in a link.
   if (slug.includes('.')) {
-    return { ok: false, reason: 'looks_like_a_file', message: 'Cannot contain a dot' }
+    return { ok: false, reason: 'looks_like_a_file', message: 'Крапка не дозволена' }
   }
   if (RESERVED_SLUGS.has(slug)) {
-    return { ok: false, reason: 'reserved', message: 'That name is reserved' }
+    return { ok: false, reason: 'reserved', message: 'Це слово зарезервоване' }
   }
   return { ok: true }
 }

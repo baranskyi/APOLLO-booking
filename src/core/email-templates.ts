@@ -423,8 +423,8 @@ export function bookingConfirmationForGuest(ctx: BookingEmailContext): EmailCont
     heading: 'Зустріч підтверджено',
     intro:
       ctx.hasAttachment === false
-        ? `${ctx.booking.guestName}, тебе записано до ${hostNames(ctx)}.`
-        : `${ctx.booking.guestName}, тебе записано до ${hostNames(ctx)}. Запрошення у вкладенні — один тап, і воно в календарі.`,
+        ? `${ctx.booking.guestName}, зустріч заброньовано. Проводить ${hostNames(ctx)}.`
+        : `${ctx.booking.guestName}, зустріч заброньовано. Проводить ${hostNames(ctx)}. Запрошення у вкладенні — один тап, і воно в календарі.`,
     rows: baseRows(ctx, 'guest', tz),
     ctas: manageCtas(ctx, 'guest'),
     notes: [tzNote(tz, ctx.booking.startUtc), ...supportNote(ctx)],
@@ -439,7 +439,7 @@ export function bookingConfirmationForGuest(ctx: BookingEmailContext): EmailCont
   }
   return render(
     input,
-    `Підтверджено: ${ctx.eventType.title} з ${hostNames(ctx)} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
+    `Підтверджено: ${ctx.eventType.title} — ${hostNames(ctx)} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
   )
 }
 
@@ -458,8 +458,8 @@ export function bookingConfirmationForHost(ctx: BookingEmailContext): EmailConte
     // copy must not claim an attachment that was never actually sent.
     intro:
       ctx.hasAttachment === false
-        ? `${ctx.booking.guestName} забронював ${ctx.eventType.title}. Уже у твоєму календарі.`
-        : `${ctx.booking.guestName} забронював ${ctx.eventType.title}. Уже у твоєму календарі — запрошення також у вкладенні, якщо знадобиться деінде.`,
+        ? `${ctx.eventType.title}. Гість: ${ctx.booking.guestName}. Уже у твоєму календарі.`
+        : `${ctx.eventType.title}. Гість: ${ctx.booking.guestName}. Уже у твоєму календарі — запрошення також у вкладенні, якщо знадобиться деінде.`,
     rows: baseRows(ctx, 'host', tz),
     ctas: manageCtas(ctx, 'host'),
     notes: [tzNote(tz, ctx.booking.startUtc)],
@@ -501,11 +501,11 @@ export function bookingRescheduled(ctx: RescheduleEmailContext): EmailContent {
     intro:
       ctx.audience === 'guest'
         ? ctx.hasAttachment === false
-          ? `Зустріч із ${who} має новий час.`
-          : `Зустріч із ${who} має новий час. Оновлене запрошення у вкладенні — воно замінює старе, видаляти нічого не треба.`
+          ? `Зустріч ${ctx.eventType.title} має новий час.`
+          : `Зустріч ${ctx.eventType.title} має новий час. Оновлене запрошення у вкладенні — воно замінює старе, видаляти нічого не треба.`
         : ctx.hasAttachment === false
-          ? `${who} переніс зустріч. Твій календар оновлено автоматично.`
-          : `${who} переніс зустріч. Твій календар оновлено автоматично, оновлене запрошення теж у вкладенні.`,
+          ? `Зустріч перенесено. Гість: ${who}. Твій календар оновлено автоматично.`
+          : `Зустріч перенесено. Гість: ${who}. Твій календар оновлено автоматично, оновлене запрошення теж у вкладенні.`,
     rows,
     ctas: manageCtas(ctx, ctx.audience),
     notes: [
@@ -547,7 +547,7 @@ export function bookingCancelled(ctx: CancellationEmailContext): EmailContent {
     preheader: `${ctx.eventType.title} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
     heading: 'Зустріч скасовано',
     intro: by
-      ? `${by} скасував ${ctx.eventType.title}. Подію прибрано з календаря.`
+      ? `Зустріч ${ctx.eventType.title} скасовано. Ініціатор: ${by}. Подію прибрано з календаря.`
       : `${ctx.eventType.title} скасовано і прибрано з календаря.`,
     rows,
     ctas: ctx.rebookUrl ? [{ label: 'Обрати новий час', url: ctx.rebookUrl, primary: true }] : [],
@@ -565,12 +565,14 @@ export function bookingReminder(ctx: ReminderEmailContext): EmailContent {
   const tz = zoneFor(ctx, ctx.audience)
   const brandName = brandOf(ctx)
   const lead = ctx.when === '24h' ? 'завтра' : 'за годину'
-  const who = ctx.audience === 'guest' ? hostNames(ctx) : ctx.booking.guestName
+  // The other party is named in the details table below, not in the intro
+  // sentence: Ukrainian would need it in the instrumental case, and a name out
+  // of the database is only ever nominative.
   const input: ShellInput = {
     brandName,
     preheader: `${ctx.eventType.title} ${lead} — ${formatWhenShort(ctx.booking.startUtc, tz)}`,
     heading: ctx.when === '24h' ? 'Зустріч завтра' : 'Зустріч за годину',
-    intro: `Нагадуємо: ${ctx.eventType.title} з ${who} — ${lead}.`,
+    intro: `Нагадуємо: ${ctx.eventType.title} — ${lead}.`,
     rows: baseRows(ctx, ctx.audience, tz),
     ctas: manageCtas(ctx, ctx.audience),
     notes: [tzNote(tz, ctx.booking.startUtc), ...supportNote(ctx)],

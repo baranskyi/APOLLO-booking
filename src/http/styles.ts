@@ -544,7 +544,11 @@ input:has(+ .pu-err),select:has(+ .pu-err),textarea:has(+ .pu-err){border-color:
 /* A <label> acting as the file-picker's whole visible control (the input
    itself is .pu-sr-hidden inside it) — button look, real keyboard path via
    the focused input within. */
-.pu-file-btn{position:relative;cursor:pointer;text-align:center;white-space:nowrap}
+/* Sits in the 8.5rem photo rail, so it cannot carry the standard button
+   padding: an uppercased, tracked Ukrainian label at full size overflows
+   the column and bleeds off the card. */
+.pu-file-btn{position:relative;cursor:pointer;text-align:center;white-space:nowrap;
+  padding:.6rem .9rem;font-size:.75rem;letter-spacing:.06em}
 .pu-file-btn:has(input:focus-visible){outline:2px solid var(--pu-border-focus);outline-offset:2px}
 /* De-emphasised destructive text action ("Remove") — a full ghost button
    next to Upload would give deleting the photo equal billing with adding

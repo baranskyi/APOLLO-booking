@@ -177,7 +177,7 @@ export function avatarHtml(opts: { key: string | null; name: string; size?: numb
     return `<img src="/avatars/${encodeURIComponent(opts.key)}" alt="${escapeHtml(opts.alt ?? opts.name)}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;display:block;flex:none" loading="lazy">`
   }
   const initial = (opts.name.trim().charAt(0) || '?').toUpperCase()
-  return `<div aria-hidden="true" style="width:${size}px;height:${size}px;border-radius:50%;background:var(--pu-green-700);color:var(--pu-paper);display:flex;align-items:center;justify-content:center;font-family:var(--pu-font-mono);font-weight:600;font-size:${Math.round(size * 0.42)}px;flex:none">${escapeHtml(initial)}</div>`
+  return `<div aria-hidden="true" style="width:${size}px;height:${size}px;border-radius:50%;background:var(--pu-green-fill);color:var(--pu-text-on-accent);display:flex;align-items:center;justify-content:center;font-family:var(--pu-font-mono);font-weight:600;font-size:${Math.round(size * 0.42)}px;flex:none">${escapeHtml(initial)}</div>`
 }
 
 /**
@@ -568,7 +568,7 @@ export function bookedConfirmation(opts: {
   </svg>
   <p><span class="pu-badge">Підтверджено</span></p>
   <h1>Заброньовано</h1>
-  <p class="pu-muted"><strong style="color:var(--pu-ink-950)">${escapeHtml(opts.eventTitle)}</strong> з ${escapeHtml(opts.hostName)}</p>
+  <p class="pu-muted"><strong style="color:var(--pu-ink-950)">${escapeHtml(opts.eventTitle)}</strong> · ${escapeHtml(opts.hostName)}</p>
   <dl class="pu-confirm-details">
     <div><dt>Коли</dt><dd class="pu-time">${escapeHtml(when)}<br>
       <span class="pu-muted">${escapeHtml(opts.guestTimezone)}</span></dd></div>

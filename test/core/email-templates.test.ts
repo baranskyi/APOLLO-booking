@@ -370,7 +370,7 @@ describe('lifecycle templates', () => {
       rebookUrl: 'https://punctual.example/grace/intro',
     })
     expect(mail.subject.startsWith('Скасовано:')).toBe(true)
-    expect(mail.text).toContain('Grace Hopper скасував')
+    expect(mail.text).toContain('Ініціатор: Grace Hopper')
     expect(mail.text).toContain('Travelling')
     expect(mail.text).toContain('https://punctual.example/grace/intro')
     expect(mail.html).toContain('#D41A1A')

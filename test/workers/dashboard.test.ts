@@ -587,7 +587,7 @@ describe('settings — change slug', () => {
 
     const res = await post('/dashboard/settings', { slug: 'dashboard', csrf }, cookie)
     expect(res.status).toBe(400)
-    expect(await res.text()).toContain('reserved')
+    expect(await res.text()).toContain('зарезервоване')
 
     const row = await db
       .prepare('SELECT slug FROM users WHERE id = ?')
