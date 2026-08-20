@@ -1788,7 +1788,7 @@ export function buildDashboardRoutes(ports: EnginePorts, slots: SlotService): Ap
 
   function oauthError(c: Ctx, message: string): Response | Promise<Response> {
     return c.html(
-      shellHead({ title: 'Sign-in failed', brandName }) + errorPage('Sign-in failed', message) + shellFoot(brandName),
+      shellHead({ title: 'Не вдалося увійти', brandName }) + errorPage('Не вдалося увійти', message) + shellFoot(brandName),
       400,
     )
   }

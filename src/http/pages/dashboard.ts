@@ -207,7 +207,7 @@ export function loginPage(d: LoginPageData): string {
   }`
 
   return (
-    shellHead({ title: `Sign in · ${d.brandName}`, brandName: d.brandName }) +
+    shellHead({ title: `Вхід · ${d.brandName}`, brandName: d.brandName }) +
     `<section class="pu-card" style="max-width:26rem;margin:3rem auto">${body}</section>` +
     shellFoot(d.brandName)
   )
