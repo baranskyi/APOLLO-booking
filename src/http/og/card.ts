@@ -28,14 +28,25 @@ export interface OgCardProps {
   brandName: string
 }
 
-const INK = '#0F1512'
-const PAPER = '#FAFAF7'
-const SIGNAL_GREEN = '#1FC16B'
+const INK = '#000000'
+const PAPER = '#FFFFFF'
+/** Ignite — the brand's accent. 7.1:1 on the black card. */
+const SIGNAL_GREEN = '#FF6424'
 /** Paper at reduced opacity reads as "muted label" without a third color token. */
-const PAPER_MUTED = 'rgba(250,250,247,0.55)'
+const PAPER_MUTED = 'rgba(255,255,255,0.55)'
 
+/**
+ * One face for the whole card, and it is the mono one.
+ *
+ * Halvar carries the brand everywhere else, but satori needs the font bytes
+ * embedded and Halvar is licensed software in a public repository — it cannot
+ * ship here (see assets/fonts/HALVAR-README.txt). Between the two OFL faces
+ * that can, mono is the honest choice rather than a second sans nothing else
+ * in the product uses: this card is a duration, a name and a clock, which is
+ * exactly the tabular metadata the brand sets in mono anyway.
+ */
 const MONO = 'IBM Plex Mono'
-const DISPLAY = 'Schibsted Grotesk'
+const DISPLAY = MONO
 
 /** Longer host/event combinations still fit at 1200x630 without overflowing satori's layout. */
 function titleFontSize(titleLine: string, subtitleLine: string): number {
@@ -108,7 +119,7 @@ export function buildOgCard(props: OgCardProps): OgElement {
   }
 }
 
-/** `punctual:` — the wordmark with its colon in signal green (docs/branding/brand.md §1). */
+/** The wordmark: brand name in caps, with the accent carried by a trailing dot. */
 function wordmark(brandName: string): OgElement {
   return {
     type: 'div',
@@ -121,8 +132,8 @@ function wordmark(brandName: string): OgElement {
         color: PAPER_MUTED,
       },
       children: [
-        { type: 'span', props: { children: brandName.toLowerCase() } },
-        { type: 'span', props: { style: { color: SIGNAL_GREEN }, children: ':' } },
+        { type: 'span', props: { children: brandName.toUpperCase() } },
+        { type: 'span', props: { style: { color: SIGNAL_GREEN }, children: '.' } },
       ],
     },
   }

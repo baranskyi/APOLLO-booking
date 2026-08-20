@@ -23,7 +23,7 @@ import { Resvg, initWasm } from '@resvg/resvg-wasm'
 import resvgWasmModule from '../../../node_modules/@resvg/resvg-wasm/index_bg.wasm'
 
 import { buildOgCard } from './card.js'
-import { plexMonoSubset, schibstedGroteskSubset } from './fonts.js'
+import { plexMonoSubset } from './fonts.js'
 import { isRenderSafe } from './safety.js'
 
 export interface OgRenderInput {
@@ -62,12 +62,6 @@ export async function renderOgCard(input: OgRenderInput): Promise<Uint8Array | n
       height: HEIGHT,
       fonts: [
         { name: 'IBM Plex Mono', data: plexMonoSubset().buffer as ArrayBuffer, weight: 600, style: 'normal' },
-        {
-          name: 'Schibsted Grotesk',
-          data: schibstedGroteskSubset().buffer as ArrayBuffer,
-          weight: 600,
-          style: 'normal',
-        },
       ],
     })
 

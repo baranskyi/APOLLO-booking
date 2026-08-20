@@ -44,8 +44,9 @@ describe('buildOgCard', () => {
     expect(serialised).toContain('Book 30 min')
     expect(serialised).toContain('with Serge')
     expect(serialised).toContain('10:30 GMT+3')
-    // Lowercased, colon-mark wordmark (docs/branding/brand.md §1) — never the title-cased brand name.
-    expect(serialised).toContain('punctual')
-    expect(serialised).not.toContain('Punctual')
+    // The wordmark is set in caps with an accent dot — never the brand name
+    // as stored, which would read as body text next to the title line.
+    expect(serialised).toContain('PUNCTUAL')
+    expect(serialised).not.toContain('punctual')
   })
 })
